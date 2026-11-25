@@ -208,14 +208,17 @@ const auth=firebase.auth(),fs=firebase.firestore();
 async function signIn(){const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
 try{await auth.signInWithPopup(p)}catch(e){if(/popup|cancelled-popup|operation-not-supported/.test(e.code||''))await auth.signInWithRedirect(p);else overlay(e.code==='auth/unauthorized-domain'?'This website is not yet authorised in Firebase (Authentication → Settings → Authorised domains).':'Sign-in failed. Please try again.')}}
 window.fbSignOut=async()=>{await auth.signOut();location.reload()};
-const wrapDoc=s=>({id:s.id,exists:s.exists,data:()=>s.exists?s.data():undefined,metadata:{fromCache:s.metadata.fromCache,hasPendingWrites:s.metadata.hasPendingWrites}});
+// Firestore can't store arrays inside arrays: wrap inner arrays as {__a:[...]} and unwrap on read.
+const enc=x=>Array.isArray(x)?x.map(v=>Array.isArray(v)?{__a:enc(v)}:enc(v)):x&&typeof x==='object'?Object.fromEntries(Object.entries(x).map(([k,v])=>[k,enc(v)])):x;
+const dec=x=>Array.isArray(x)?x.map(v=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===1&&Array.isArray(v.__a)?dec(v.__a):dec(v)):x&&typeof x==='object'?Object.fromEntries(Object.entries(x).map(([k,v])=>[k,dec(v)])):x;
+const wrapDoc=s=>({id:s.id,exists:s.exists,data:()=>s.exists?dec(s.data()):undefined,metadata:{fromCache:s.metadata.fromCache,hasPendingWrites:s.metadata.hasPendingWrites}});
 const wrapQ=q=>{const docs=q.docs.map(wrapDoc);return{docs,size:docs.length,empty:!docs.length,docChanges:()=>[],metadata:{fromCache:q.metadata.fromCache,hasPendingWrites:q.metadata.hasPendingWrites}}};
-const code=e=>({code:e?.code==='permission-denied'?'invalid_argument':e?.code==='resource-exhausted'?'quota_exceeded':'unavailable',message:e?.message||''});
+const code=e=>{console.error('Firestore:',e);return{code:e?.code==='permission-denied'?'invalid_argument':e?.code==='resource-exhausted'?'quota_exceeded':'unavailable',message:e?.message||''}};
 let me='';
 const docRef=p=>{const r=fs.doc(p);return{id:r.id,path:p,
  get:async()=>{try{return wrapDoc(await r.get())}catch(e){if(e.code==='permission-denied')return{id:r.id,exists:false,data:()=>undefined,metadata:{fromCache:false,hasPendingWrites:false}};throw code(e)}},
- set:async d=>{try{await r.set(d)}catch(e){throw code(e)}},
- update:async d=>{try{await r.set(d,{merge:true})}catch(e){throw code(e)}},
+ set:async d=>{try{await r.set(enc(d))}catch(e){throw code(e)}},
+ update:async d=>{try{await r.set(enc(d),{merge:true})}catch(e){throw code(e)}},
  delete:async()=>{try{await r.delete()}catch(e){throw code(e)}},
  acquire:async o=>{const L=fs.doc('locks/'+p.replace(/\//g,'_'));try{return await fs.runTransaction(async t=>{const s=await t.get(L),now=Date.now(),d=s.exists?s.data():null;if(d&&d.exp>now&&d.holder!==o.holder)return{acquired:false,expiresAt:new Date(d.exp).toISOString()};const exp=now+(o.ttlMs||30000);t.set(L,{holder:o.holder,exp});return{acquired:true,holder:o.holder,expiresAt:new Date(exp).toISOString()}})}catch{return{acquired:false}}},
  onSnapshot:(n,err)=>r.onSnapshot(s=>n(wrapDoc(s)),e=>err&&err(code(e))),
