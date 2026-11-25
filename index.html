@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Household Accounts</title><style id="css">
+/* VOICE formal household accounts for a joint family, like a small firm's books
+   IDEA a ruled account ledger with a summary statement on top
+   PICTURE the statement band: closing balance, receipts, payments, then ruled tables
+   COLOUR charcoal #1f2328 band, white panels on stone #eceae6, brick #b3341f accent only
+   TYPE Arial throughout. LAYOUT full-width band, tab rule, one column of ruled panels */
+:root{color-scheme:light dark;--bg:light-dark(#eceae6,#121416);--panel:light-dark(#fff,#1c1f23);--ink:light-dark(#1f2328,#eceff2);--mut:light-dark(#5d6670,#9ba5af);--line:light-dark(#dcd8d2,#30353b);--m:light-dark(#1f2328,#2a2f35);--m2:light-dark(#1f2328,#d6dbe0);--btn:light-dark(#1f2328,#eceff2);--btnt:light-dark(#fff,#121416);--g:#b3341f;--in:light-dark(#1b6b45,#5cc690);--out:light-dark(#a3281c,#ff8a7d);--soft:light-dark(#f5f3f0,#23272c);--hink:#fff;--hsub:#c9ced4;--hb:4px solid #b3341f;--rad:3px}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0;font-family:Arial,Helvetica,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Arial,Helvetica,sans-serif;overflow-x:clip}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
+.hero{background:var(--m);color:var(--hink);padding:26px 0 22px;border-bottom:var(--hb)}
+.hero .wrap{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:flex-end;justify-content:space-between}
+h1{font-size:clamp(28px,4vw,38px);line-height:1.1;margin:0;font-weight:700;letter-spacing:-.01em}
+.sub{margin:6px 0 0;color:var(--hsub);font-size:14px}
+.bal{text-align:right}.bal .lbl{display:block;font-size:13px;color:var(--hsub)}
+.bal .big{display:block;font-size:clamp(34px,6vw,54px);line-height:1.05;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mini{display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-end;font-size:13px;margin-top:8px;color:var(--hsub)}.mini b{color:var(--hink);white-space:nowrap}
+@media(max-width:600px){.bal{text-align:left}.mini{justify-content:flex-start}}
+nav{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;display:flex;align-items:center;padding:10px 14px;color:var(--mut);text-decoration:none;font-size:14px;font-weight:700;border-bottom:3px solid transparent;min-height:46px}
+nav a[aria-current]{color:var(--ink);border-color:var(--g)}
+main{padding:24px 0 70px}
+.grid{display:grid;gap:0;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));background:var(--panel);border:1px solid var(--line)}
+.grid .card{border:0;border-right:1px solid var(--line);border-radius:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);padding:18px 20px}
+h2{font-size:17px;margin:0 0 14px;font-weight:700;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.stat .n{font-size:26px;font-weight:700;white-space:nowrap;line-height:1.2;font-variant-numeric:tabular-nums}.stat .l{color:var(--mut);font-size:13px;margin-bottom:4px}
+.cols{display:grid;gap:16px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);margin-top:16px}
+@media(max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:12px;color:var(--mut);font-weight:700;border-bottom:2px solid var(--ink);padding:6px 8px;text-transform:none}
+td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:middle}
+tbody tr:hover{background:var(--soft)}
+.r{text-align:right;white-space:nowrap}.in{color:var(--in)}.out{color:var(--out)}
+form.add{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:18px}
+label.f{display:flex;flex-direction:column;font-size:12px;font-weight:700;color:var(--mut);gap:4px;flex:1 1 130px}
+input,select{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--rad);background:var(--panel);color:var(--ink);min-height:42px;width:100%}
+input[type=checkbox]{width:20px;height:20px;min-height:0;accent-color:var(--g);flex:none}
+button{font:inherit;font-weight:700;font-size:14px;min-height:42px;padding:8px 16px;border-radius:var(--rad);border:1px solid var(--btn);background:var(--btn);color:var(--btnt);cursor:pointer;white-space:nowrap}
+button.ghost{background:transparent;color:var(--ink)}
+button.x{background:transparent;border:0;color:var(--mut);padding:6px 10px;font-size:20px;line-height:1}
+button.sm{min-height:34px;padding:3px 12px;font-size:13px}
+:focus-visible{outline:2px solid var(--g);outline-offset:2px}
+.tag{display:inline-block;padding:2px 8px;border-radius:2px;font-size:12px;font-weight:700;white-space:nowrap}
+.paid{background:light-dark(#e3f1e9,#15301f);color:var(--in)}.due{background:light-dark(#efede9,#2b2f34);color:var(--mut)}.late{background:light-dark(#f8e3df,#3a1a16);color:var(--out)}
+.bar{display:grid;grid-template-columns:12em minmax(0,1fr) 6em;gap:10px;align-items:center;font-size:13px;margin:9px 0}
+@media(max-width:600px){.bar{grid-template-columns:8.5em minmax(0,1fr) 5.5em}}
+.bar i{display:block;height:10px;background:var(--m2)}.bar i.top{background:var(--g)}
+.list{list-style:none;margin:0;padding:0}.list li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.list a{color:var(--ink)}
+.grow{flex:1}.muted{color:var(--mut);font-size:13px}
+.note{background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--g);padding:10px 14px;font-size:13px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.days{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 100%}.days label{display:flex;align-items:center;gap:4px;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:var(--rad);min-height:42px;background:var(--panel)}
+.days input{width:16px;height:16px}
+.clean td.d,.clean th.d{text-align:center;width:3.6em}.clean .t{background:var(--soft)}
+.dot{display:inline-block;width:8px;height:8px;background:var(--m2)}
+.board{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.item{border:1px solid var(--line);border-radius:var(--rad);padding:10px 12px;margin-bottom:8px;background:var(--soft)}
+.item .row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.done .grow{text-decoration:line-through;color:var(--mut)}
+.inl{display:flex;gap:6px;align-items:center}.inl input{width:7.5em;min-height:34px;padding:4px 8px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,140px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--rad);display:flex;gap:12px;align-items:center;transition:transform .2s;z-index:9;max-width:92vw;font-size:14px}
+#toast.on{transform:translate(-50%,0)}#toast button{background:var(--g);border-color:var(--g);color:#fff;min-height:34px}
+@media(prefers-reduced-motion:reduce){#toast{transition:none}}
+.scroll{overflow-x:auto}
+@media(max-width:600px){table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:2px 0;padding-inline-start:7.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7em;margin-inline-start:-7.5em;color:var(--mut);font-size:12px;font-weight:700}.stack td:empty{display:none}}
+.ed{border-color:transparent;background:transparent;min-height:36px;padding:4px 6px}.ed:hover,.ed:focus{border-color:var(--line);background:var(--panel)}
+td .ed{width:100%}td.r .ed,.ed.r{text-align:right}
+textarea{font:inherit;font-size:15px;width:100%;padding:10px;border:1px solid var(--line);border-radius:var(--rad);background:var(--panel);color:var(--ink);resize:vertical}
+h3{font-size:14px;margin:18px 0 6px;color:var(--mut)}
+.meter{height:10px;background:var(--soft);border:1px solid var(--line)}.meter i{display:block;height:100%;background:var(--m2)}.meter i.over{background:var(--g)}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.menu td{padding:4px}.menu tr.t td{background:var(--soft)}.menu td:first-child{white-space:nowrap;padding-left:8px}
+.inl select{width:auto;min-height:34px;padding:4px 6px}
+
+:root[data-density=compact] body{font-size:14px}:root[data-density=compact] td{padding:5px 6px}:root[data-density=compact] .card{padding:12px 14px}:root[data-density=compact] main{padding-top:14px}:root[data-density=compact] .list li{padding:5px 0}:root[data-density=compact] .hero{padding:16px 0 14px}:root[data-density=compact] .cols,:root[data-density=compact] .board{gap:10px}
+.themes{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr))}
+.sw{display:block;text-align:left;background:var(--panel);color:var(--ink);border:2px solid var(--line);padding:0;overflow:hidden;font-weight:400;white-space:normal;border-radius:var(--rad)}
+.sw[aria-pressed=true]{border-color:var(--g);box-shadow:0 0 0 2px var(--g)}
+.pv{background:var(--pbg);padding:0 0 10px}.pvh{background:var(--pm);color:var(--ph);padding:10px 12px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--pg);font-size:12px}.pvh b{font-size:18px}
+.pvn{display:flex;gap:10px;padding:6px 12px;background:var(--pp);font-size:11px;color:#888}.pvn span:first-child{color:var(--pi);border-bottom:2px solid var(--pg)}
+.pvc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 12px 4px}.pvc i{background:var(--pp);height:30px;border:1px solid rgba(128,128,128,.25);font-style:normal;font-size:11px;padding:3px 5px;color:var(--pi)}
+.pvr{padding:2px 12px}.pvr span{display:block;height:7px;background:var(--p2);margin:5px 0}.pvr span.a{background:var(--pg)}
+.pvbtn{display:inline-block;margin:6px 12px 0;padding:3px 10px;background:var(--pb);color:var(--pbt);font-size:11px;font-weight:700}
+.swt{padding:10px 12px;border-top:1px solid var(--line)}.swt b{display:block}
+.optrow{display:flex;flex-wrap:wrap;gap:24px;margin-top:20px}
+
+.app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh}
+.side{background:var(--m);color:var(--hink);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:20px 14px;border-right:var(--hb);scrollbar-width:thin}
+.brand b{display:block;font-size:19px;line-height:1.2}.brand span{display:block;font-size:13px;color:var(--hsub);margin-top:4px;line-height:1.35}
+.sbal{margin:18px 0 14px;padding:12px;border:1px solid color-mix(in srgb,var(--hsub) 40%,transparent);border-radius:var(--rad)}
+.sbal span{font-size:13px;color:var(--hsub)}.sbal b{display:block;font-size:27px;line-height:1.15;white-space:nowrap;font-variant-numeric:tabular-nums}.sbal small{display:block;font-size:13px;color:var(--hsub);margin-top:2px}
+.snav{display:flex;flex-direction:column;gap:2px}
+.snav a{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:var(--rad);color:var(--hsub);text-decoration:none;font-size:14px;font-weight:700;min-height:42px;border-left:3px solid transparent;position:relative}
+.snav a:hover{color:var(--hink);background:color-mix(in srgb,var(--hink) 8%,transparent)}
+.snav a[aria-current]{color:var(--hink);background:color-mix(in srgb,var(--hink) 14%,transparent);border-left-color:var(--g)}
+.snav svg{width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cnt{margin-left:auto;background:var(--g);color:#fff;font-size:12px;font-style:normal;border-radius:99px;padding:0 7px;line-height:19px;min-width:19px;text-align:center}
+.sfoot{margin-top:auto;padding-top:16px;font-size:13px;color:var(--hsub)}
+.top{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-end;padding:22px max(3vw,16px) 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.top h1{font-size:clamp(24px,3vw,32px)}.top p{margin:4px 0 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{font-size:13px;padding:5px 11px;border:1px solid var(--line);border-radius:99px;background:var(--bg);white-space:nowrap}
+.mainc main{padding:20px max(3vw,16px) 70px;max-width:1260px}
+:root[data-density=compact] .mainc main{padding-top:12px}:root[data-density=compact] .top{padding-top:14px;padding-bottom:10px}:root[data-density=compact] .snav a{min-height:36px;padding:5px 10px}
+@media(max-width:860px){.app{grid-template-columns:minmax(0,1fr)}.side{position:static;height:auto;padding:12px 12px 0;border-right:0;border-bottom:var(--hb);overflow:visible}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.brand span,.sfoot{display:none}
+.sbal{margin:8px 0 6px;padding:0;border:0;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline}.sbal b{font-size:24px}.sbal small{margin:0}
+.snav{flex-direction:row;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 6px}
+.snav a{flex:none;flex-direction:column;gap:3px;font-size:12px;padding:8px 9px 7px;border-left:0;border-bottom:3px solid transparent;border-radius:0;min-height:56px;justify-content:center}
+.snav a[aria-current]{border-bottom-color:var(--g);background:transparent}.snav a:hover{background:transparent}
+.cnt{position:absolute;top:3px;right:2px;font-size:11px;line-height:16px;min-width:16px;padding:0 4px}}
+.pv{display:grid;grid-template-columns:72px minmax(0,1fr);background:var(--pbg);height:128px;padding:0}
+.pvs{background:var(--pm);color:var(--ph);padding:9px 7px;border-right:3px solid var(--pg)}.pvs b{display:block;font-size:12px;margin-bottom:8px}
+.pvs i{display:block;height:6px;margin:7px 0;background:var(--ph);opacity:.3}.pvs i.on{opacity:1;background:var(--pg)}
+.pvm{padding-top:4px}
+
+:root[data-glass="1"] body{background:light-dark(#f4e9ec,#120a0f)}
+:root[data-glass="1"] body::before{content:"";position:fixed;inset:-12%;z-index:-1;pointer-events:none;background:radial-gradient(38% 42% at 14% 18%,light-dark(#e9a3b7,#7a2343) 0,transparent 70%),radial-gradient(34% 40% at 86% 12%,light-dark(#f7c86e,#7a4a06) 0,transparent 70%),radial-gradient(44% 48% at 78% 82%,light-dark(#9fd4d8,#0d4a50) 0,transparent 70%),radial-gradient(40% 44% at 22% 88%,light-dark(#cdb6ea,#3a2160) 0,transparent 70%),radial-gradient(30% 30% at 50% 50%,light-dark(#f3b9a3,#5a1f2a) 0,transparent 70%);animation:drift 45s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(4%,-3%,0) scale(1.08) rotate(3deg)}}
+@media(prefers-reduced-motion:reduce){:root[data-glass="1"] body::before{animation:none}}
+:root[data-glass="1"] :is(.card,.top,.note,.item,#toast,.side){backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);box-shadow:inset 0 1px 0 light-dark(rgba(255,255,255,.9),rgba(255,255,255,.14)),inset 0 -1px 0 light-dark(rgba(255,255,255,.25),rgba(255,255,255,.04)),0 12px 32px light-dark(rgba(90,20,45,.12),rgba(0,0,0,.4))}
+:root[data-glass="1"] .card{border-radius:20px;border:1px solid var(--line)}
+:root[data-glass="1"] .grid{background:transparent;border:0;gap:14px}:root[data-glass="1"] .grid .card{border:1px solid var(--line);border-radius:20px}
+:root[data-glass="1"] .app{grid-template-columns:262px minmax(0,1fr)}
+:root[data-glass="1"] .side{margin:12px 0 12px 12px;top:12px;height:calc(100vh - 24px);border-radius:24px;border:1px solid rgba(255,255,255,.38)}
+:root[data-glass="1"] .top{margin:12px 12px 0;border-radius:20px;border:1px solid var(--line)}
+:root[data-glass="1"] .chip{background:light-dark(rgba(255,255,255,.55),rgba(255,255,255,.07));border-color:var(--line)}
+:root[data-glass="1"] .snav a{border-radius:14px;border-left:0}:root[data-glass="1"] .snav a[aria-current]{background:rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+:root[data-glass="1"] .sbal{border-radius:16px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+:root[data-glass="1"] .note{border-radius:16px;border:1px solid var(--line);border-left:1px solid var(--line)}
+:root[data-glass="1"] button{border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}:root[data-glass="1"] button.ghost{background:light-dark(rgba(255,255,255,.5),rgba(255,255,255,.06));border-color:var(--line)}:root[data-glass="1"] button.x{box-shadow:none;background:transparent}
+:root[data-glass="1"] input,:root[data-glass="1"] select,:root[data-glass="1"] textarea{border-radius:12px;border-color:var(--line)}:root[data-glass="1"] .ed{border-color:transparent}
+:root[data-glass="1"] .tag{border-radius:99px}:root[data-glass="1"] th{border-bottom:1px solid light-dark(rgba(33,23,26,.3),rgba(255,255,255,.25))}
+:root[data-glass="1"] .item{border-radius:14px}:root[data-glass="1"] .meter{border-radius:99px;overflow:hidden}:root[data-glass="1"] .bar i,:root[data-glass="1"] .meter i{border-radius:99px}
+:root[data-glass="1"] .sw{border-radius:18px}
+@media(max-width:860px){:root[data-glass="1"] .app{grid-template-columns:minmax(0,1fr)}:root[data-glass="1"] .side{margin:8px;height:auto;border-radius:20px;padding-bottom:0}:root[data-glass="1"] .top{margin:8px 8px 0}:root[data-glass="1"] .snav a{border-radius:0}}
+td[data-l=Date],td[data-l=Reported],td[data-l=Sent]{white-space:nowrap}
+
+.card,.item,.sw,.snav a,.chip,button,.list li,.tag,.stat .n,input,select,textarea{transition:transform .32s cubic-bezier(.2,.8,.2,1),box-shadow .32s cubic-bezier(.2,.8,.2,1),background-color .25s ease,border-color .25s ease,color .25s ease,opacity .25s ease}
+tbody tr{transition:background-color .2s ease}
+@media(hover:hover){
+.card:hover{transform:translateY(-2px);box-shadow:0 14px 34px light-dark(rgba(70,20,40,.13),rgba(0,0,0,.45))}
+.grid .card:hover,.item:hover,.sw:hover{transform:translateY(-4px);box-shadow:0 18px 40px light-dark(rgba(70,20,40,.16),rgba(0,0,0,.5))}
+.grid .card:hover .n{transform:scale(1.03)}.stat .n{transform-origin:left center}
+.snav a:hover{transform:translateX(4px)}.snav a[aria-current]:hover{transform:translateX(2px)}
+.list li:hover{transform:translateX(4px)}
+.chip:hover{transform:translateY(-2px)}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 18px light-dark(rgba(70,20,40,.18),rgba(0,0,0,.4))}
+button.x:hover{transform:rotate(90deg);box-shadow:none;color:var(--out)}
+input:hover,select:hover{border-color:light-dark(rgba(107,29,54,.35),rgba(255,255,255,.3))}}
+button:active{transform:translateY(0) scale(.96);transition-duration:.08s}
+:root[data-glass="1"] .card:hover,:root[data-glass="1"] .grid .card:hover,:root[data-glass="1"] .item:hover,:root[data-glass="1"] .sw:hover{box-shadow:inset 0 1px 0 light-dark(rgba(255,255,255,.95),rgba(255,255,255,.18)),0 20px 44px light-dark(rgba(90,20,45,.18),rgba(0,0,0,.5))}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes fade{from{opacity:0}}
+@keyframes grow{from{width:0}}
+.enter .top{animation:fade .4s ease both}.enter .top h1{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}.enter .top p{animation:rise .5s cubic-bezier(.2,.8,.2,1) .06s both}
+.enter main>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.enter main>*:nth-child(2){animation-delay:.07s}.enter main>*:nth-child(3){animation-delay:.14s}.enter main>*:nth-child(4){animation-delay:.21s}
+.enter .grid>.card,.enter .board>.card,.enter .cols>.card,.enter .themes>.sw{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.enter .grid>.card:nth-child(2),.enter .cols>.card:nth-child(2),.enter .board>.card:nth-child(2),.enter .themes>.sw:nth-child(2){animation-delay:.06s}
+.enter .grid>.card:nth-child(3),.enter .board>.card:nth-child(3),.enter .themes>.sw:nth-child(3){animation-delay:.12s}
+.enter .grid>.card:nth-child(4),.enter .themes>.sw:nth-child(4){animation-delay:.18s}
+.enter .themes>.sw:nth-child(n+5){animation-delay:.24s}
+.enter .list li{animation:rise .45s cubic-bezier(.2,.8,.2,1) .15s both}
+.enter .meter i,.enter .bar i{animation:grow 1s cubic-bezier(.2,.8,.2,1) .25s both}
+.snav a[aria-current] svg{animation:pop .45s cubic-bezier(.2,.8,.2,1)}@keyframes pop{50%{transform:scale(1.22)}}
+.cnt{animation:pop .5s cubic-bezier(.2,.8,.2,1)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.sela{display:flex;gap:6px;align-items:stretch}.sela select{flex:1;min-width:0}.addo{min-height:44px;padding:4px 11px;font-size:13px}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}h2.hrow .addo{min-height:34px}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;font-size:14px}.kv span{color:var(--mut)}.kv b{text-align:right;white-space:nowrap}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chipset{display:flex;flex-wrap:wrap;gap:6px}.opt{display:inline-flex;align-items:center;gap:2px;padding:3px 4px 3px 11px;border:1px solid var(--line);border-radius:99px;background:var(--soft);font-size:13px}.opt small{white-space:nowrap;color:var(--mut);font-size:11px;padding:0 8px 0 6px}.opt .x{font-size:17px;padding:2px 7px;min-height:28px}
+.rad{display:flex;align-items:center;gap:6px;font-size:14px;padding:6px 12px;border:1px solid var(--line);border-radius:var(--rad);min-height:40px}.rad input{width:16px;height:16px}
+.dlg{position:fixed;inset:0;z-index:30;background:light-dark(rgba(40,12,24,.3),rgba(0,0,0,.55));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .2s ease}
+.dlg[hidden]{display:none}.dlgc{width:min(420px,100%);animation:rise .3s cubic-bezier(.2,.8,.2,1)}.dlgc:hover{transform:none}
+
+.loading{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--mut)}.loading b{font-size:24px;color:var(--ink)}
+.steps{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}.steps div{display:flex;flex-direction:column;gap:4px;font-size:14px}.steps b{font-size:15px}.steps span{color:var(--mut)}
+.ugrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));margin-top:14px}
+.mods{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
+.mod{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:var(--rad);background:var(--soft);cursor:pointer}.mod input{margin-top:2px}.mod b{display:block;font-size:14px}.mod small{display:block;color:var(--mut);font-size:13px}.mod.sm{padding:6px 10px;align-items:center;font-size:14px}
+.mod:has(input:checked){border-color:var(--g);background:light-dark(color-mix(in srgb,var(--g) 9%,var(--panel)),color-mix(in srgb,var(--g) 14%,var(--panel)))}
+.cats{margin-top:12px}.cats summary{cursor:pointer;font-weight:700;font-size:14px;padding:6px 0}.cats .mods{margin-top:8px}
+.ucard h3{margin-top:16px}
+</style></head><body><div id="root"></div><div id="toast" role="status"></div><script id="appjs">{
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const INR=n=>'₹'+Math.round(+n||0).toLocaleString('en-IN');
+const pad=n=>String(n).padStart(2,'0');
+const now=new Date(),today=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`,ym=today.slice(0,7),dom=now.getDate();
+const mName=k=>new Date(k+'-01T00:00').toLocaleString('en-IN',{month:'long',year:'numeric'});
+const mLab=k=>k?new Date(k+'-01T00:00').toLocaleString('en-IN',{month:'short',year:'numeric'}):'';
+const curMon=new Date(ym+'-01T00:00').toLocaleString('en-IN',{month:'short'});
+const dFmt=d=>d?new Date(d+'T00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],DAYL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],tIdx=(now.getDay()+6)%7,wk=Math.min(4,Math.ceil(dom/7));
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const HF='House fund';
+const C={led:'Fund Transfer – Lalitha Event Decors',ln:'Fund Transfer – Lalitha Naturals',rent:'Rent – Commercial Space (Ground Floor)',fin:'Family Transfer In',fout:'Family Transfer Out',itr:'Internal Transfer',gro:'Groceries & Provisions',fv:'Fruits & Vegetables',med:'Medicines & Healthcare',sal:'Staff Salaries',hrep:'House Repairs & Maintenance',veh:'Vehicle Maintenance',pers:'Personal Expenses'};
+const DEF={inCats:[C.led,C.ln,C.rent,'Chit Amount Received','Other Receipts'],outCats:[C.gro,C.fv,C.med,'Fuel',C.veh,'Electricity','Mobile Bills',C.sal,'Chit Payments','Interest Payments','Loan Repayment','Property Tax',C.hrep,'Child Care & School',C.pers,'Miscellaneous'],budgetCats:[C.gro,C.fv,C.med,'Fuel',C.veh,'Child Care & School',C.pers,'Miscellaneous'],modes:['Cash','UPI','Bank Transfer','Card','Cheque'],secs:[C.gro,C.fv],assets:['House','Vehicle','Commercial Space (Ground Floor)'],slots:['Morning','Afternoon','Evening'],remCats:['Insurance','Vehicle documents','Gas booking','School fees','Subscriptions','Other']};
+const LOCK=new Set([C.led,C.ln,C.rent,'Chit Amount Received',C.gro,C.fv,C.med,C.sal,C.hrep,C.veh,C.pers,'Chit Payments','Interest Payments','Loan Repayment','Miscellaneous','Cash','Vehicle']);
+const LISTS=[['inCats','Receipt categories'],['outCats','Payment categories'],['budgetCats','Budgeted categories'],['modes','Payment modes'],['secs','Procurement sections'],['assets','Maintenance assets'],['slots','Housekeeping time slots'],['remCats','Reminder types']];
+let IN_CATS,OUT_CATS,FORM_IN,FORM_OUT,BUDGET_CATS,MODES,ASSETS,SLOTS;
+const syncOpts=()=>{S.opts=S.opts||{};for(const k in DEF)if(!Array.isArray(S.opts[k]))S.opts[k]=[...DEF[k]];FORM_IN=S.opts.inCats;FORM_OUT=S.opts.outCats;IN_CATS=[...FORM_IN,C.fin];OUT_CATS=[...FORM_OUT,C.fout];BUDGET_CATS=S.opts.budgetCats;MODES=S.opts.modes;ASSETS=S.opts.assets;SLOTS=S.opts.slots};
+const TABS=[['home','Dashboard'],['approvals','Approvals'],['ledger','Ledger'],['dues','Bills & Dues'],['loans','Chits & Loans'],['payroll','Payroll'],['family','Family'],['procure','Procurement'],['clean','Housekeeping'],['meals','Meal Plan'],['tasks','Tasks'],['maint','Maintenance'],['remind','Reminders'],['reports','Reports'],['lists','Lists & Categories'],['access','Users & Access'],['design','Design']];
+const THEMES=[
+{id:'glass',name:'Liquid Glass',d:'Frosted glass panels over soft moving colour',glass:1,pbg:'linear-gradient(135deg,#efc2cf,#f7dca8 50%,#bfe0e2)',v:{m:['rgba(107,29,54,.62)','rgba(60,14,32,.58)'],g:'#e39a14',bg:['rgba(255,255,255,.55)','rgba(255,255,255,.06)'],soft:['rgba(255,255,255,.4)','rgba(255,255,255,.06)'],m2:['#6b1d36','#f0b3c6'],btn:['#6b1d36','#f0b3c6'],btnt:['#fff','#1a0e14'],hink:'#fff',hsub:'rgba(255,255,255,.8)',hb:'1px solid rgba(255,255,255,.35)',panel:['rgba(255,255,255,.52)','rgba(40,26,34,.5)'],line:['rgba(255,255,255,.75)','rgba(255,255,255,.13)']}},
+{id:'charcoal',name:'Charcoal Ledger',d:'Formal and neutral, like an accounts office',v:{m:['#1f2328','#2a2f35'],g:'#b3341f',bg:['#eceae6','#121416'],soft:['#f5f3f0','#23272c'],m2:['#1f2328','#d6dbe0'],btn:['#1f2328','#eceff2'],btnt:['#fff','#121416'],hink:'#fff',hsub:'#c9ced4',hb:'4px solid #b3341f'}},
+{id:'blue',name:'Corporate Blue',d:'Bank-statement blue with a teal accent',v:{m:['#0b3a75','#0d2a52'],g:'#0a8f8f',bg:['#eef2f7','#0e1420'],soft:['#f4f7fb','#18202e'],m2:['#0b3a75','#9cc0f0'],btn:['#0b3a75','#9cc0f0'],btnt:['#fff','#0e1420'],hink:'#fff',hsub:'#bcd0ea',hb:'4px solid #0a8f8f'}},
+{id:'emerald',name:'Emerald Finance',d:'Deep green with a gold rule',v:{m:['#0f4d3a','#0f3328'],g:'#c39a1d',bg:['#eef3f0','#0f1513'],soft:['#f4f8f5','#1a2420'],m2:['#0f4d3a','#8fd1b5'],btn:['#0f4d3a','#8fd1b5'],btnt:['#fff','#0f1513'],hink:'#fff',hsub:'#bfdccf',hb:'4px solid #c39a1d'}},
+{id:'maroon',name:'Royal Maroon',d:'Traditional maroon and marigold',v:{m:['#6b1d36','#4a1426'],g:'#e39a14',bg:['#f6f1ec','#161012'],soft:['#fbf5ef','#251a1e'],m2:['#6b1d36','#e7a0b6'],btn:['#6b1d36','#e7a0b6'],btnt:['#fff','#161012'],hink:'#fff',hsub:'#f1d3dc',hb:'4px solid #e39a14'}},
+{id:'slate',name:'Slate & Teal',d:'Calm grey-blue with teal buttons',v:{m:['#334155','#1e293b'],g:'#0d9488',bg:['#f1f5f9','#0f172a'],soft:['#f8fafc','#1e293b'],m2:['#0f766e','#5eead4'],btn:['#0f766e','#5eead4'],btnt:['#fff','#0f172a'],hink:'#fff',hsub:'#cbd5e1',hb:'4px solid #0d9488'}},
+{id:'white',name:'Clean White',d:'Minimal white header, blue highlights',v:{m:['#ffffff','#1c1f23'],g:'#2f6fe4',bg:['#f7f7f7','#121416'],soft:['#f2f4f7','#23272c'],m2:['#2f6fe4','#8fb3ff'],btn:['#1f2328','#eceff2'],btnt:['#fff','#121416'],hink:['#1f2328','#eceff2'],hsub:['#5d6670','#9ba5af'],hb:'1px solid var(--line)'}},
+{id:'purple',name:'Plum Executive',d:'Rich plum header with a rose accent',v:{m:['#3d1f4f','#2a1537'],g:'#d14d72',bg:['#f3f0f5','#141016'],soft:['#f8f5fa','#221a27'],m2:['#3d1f4f','#d7b4ea'],btn:['#3d1f4f','#d7b4ea'],btnt:['#fff','#141016'],hink:'#fff',hsub:'#d9c8e3',hb:'4px solid #d14d72'}},
+{id:'night',name:'Midnight',d:'Always dark, easy on the eyes at night',dark:1,v:{m:'#0b0d10',g:'#4f9dff',bg:'#0f1216',soft:'#1d232b',m2:'#4f9dff',btn:'#4f9dff',btnt:'#0b0d10',hink:'#fff',hsub:'#9aa4b0',hb:'3px solid #4f9dff'}}];
+const lv=(v,dk)=>Array.isArray(v)?v[dk?1:0]:v;
+const ALLV=[...new Set(THEMES.flatMap(t=>Object.keys(t.v)))];
+function applyDesign(){const D=S.design,th=THEMES.find(x=>x.id===D.theme)||THEMES[0],r=document.documentElement;for(const k of ALLV)if(!(k in th.v))r.style.removeProperty('--'+k);r.dataset.glass=th.glass?'1':'';for(const[k,v]of Object.entries(th.v))r.style.setProperty('--'+k,Array.isArray(v)?`light-dark(${v[0]},${v[1]})`:v);r.style.colorScheme=th.dark?'dark':'';r.dataset.density=D.density;r.style.setProperty('--rad',th.glass?'14px':D.corners==='rounded'?'10px':'3px')}
+const ICON={home:'<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>',ledger:'<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',dues:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',payroll:'<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 21 19"/>',family:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M12 18s-3-2-3-4a1.5 1.5 0 0 1 3-.5 1.5 1.5 0 0 1 3 .5c0 2-3 4-3 4z"/>',procure:'<circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h11L21 8H6.2"/>',clean:'<path d="M15 3l-4 9"/><path d="M6 12h9l2 9H4z"/>',meals:'<path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10"/><path d="M17 3c-2 2-2 6 0 8v10"/>',tasks:'<path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',maint:'<path d="M14.5 6.5a4 4 0 0 0-5 5L4 17l3 3 5.5-5.5a4 4 0 0 0 5-5l-2.5 2.5-3-3z"/>',design:'<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="16" cy="10" r="1.2"/><path d="M12 21a3 3 0 0 1 0-6h2"/>'};
+Object.assign(ICON,{loans:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.5"/>',remind:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',reports:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',lists:'<path d="M4 6h16M4 12h10M4 18h7"/><path d="M18 15v6M15 18h6"/>'});
+const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+const SUB={home:'Where the house fund stands this month',ledger:'Every receipt and payment, by month and category',dues:'Monthly and periodic bills, chits, interest, tax and rent',payroll:'Salaries for household staff',family:'Members, transfers and who spent what',procure:'Groceries, fruits and vegetables',clean:'Weekly and monthly cleaning schedule',meals:'Four-week menu for the whole family',tasks:'Jobs assigned to family and staff',maint:'Repairs for the house, vehicles and shop',design:'Colours, spacing and corners',loans:'Chit groups and loans: what is paid and what is left',remind:'Renewals and one-off payments you must not miss',reports:'Month-by-month and yearly totals',lists:'Add or remove the options shown in every dropdown'};
+const KEYS=['members','txns','recur','staff','groceries','cleaning','monthly','work','repairs','loans','reminders'];
+let lastV=null;let S={},fMonth=ym,fCat='',mWeek=wk,undoSnap=null,saveT,toastT,tries=0,art=null,local=false,readOnly=false,status='';
+const fix=()=>{S.processed=S.processed||{};KEYS.forEach(k=>S[k]=S[k]||[]);for(const k of['cleanDone','mDone','budgets'])S[k]=S[k]||{};if(!Array.isArray(S.menu)||S.menu.length!==4)S.menu=[0,1,2,3].map(()=>DAYS.map(()=>['','','','']));S.menuNotes=S.menuNotes||'';syncOpts();S.design=Object.assign({theme:'charcoal',density:'comfortable',corners:'square'},S.design)};fix();
+const sum=(a,f)=>a.reduce((s,x)=>s+(+f(x)||0),0);
+const isIn=t=>t.type==='in',isOut=t=>t.type==='out';
+const bal=()=>S.txns.reduce((a,t)=>a+(isIn(t)?t.amt:isOut(t)?-t.amt:0),0);
+const ofMonth=m=>S.txns.filter(t=>t.date.startsWith(m));
+const spent=(c,m=ym)=>sum(ofMonth(m).filter(t=>isOut(t)&&t.cat===c),t=>t.amt);
+const people=()=>[...new Set([...S.members.map(m=>m.name),...S.staff.map(s=>s.name)])];
+const td=(l,v,c='')=>`<td data-l="${l}" class="${c}">${v}</td>`;
+const opts=(a,sel)=>a.map(c=>`<option${c===sel?' selected':''}>${esc(c)}</option>`).join('');
+const catOpts=sel=>`<optgroup label="Receipts">${opts(FORM_IN,sel)}</optgroup><optgroup label="Payments">${opts(FORM_OUT,sel)}</optgroup>`;
+const ed=(k,id,f,v,lab,type='text')=>`<input class="ed" type="${type}" value="${esc(v)}" data-chg="edit" data-k="${k}" data-id="${id}" data-f="${f}" aria-label="${lab}">`;
+const sA=(name,key,inner)=>`<span class="sela"><select name="${name}" data-opt="${key}">${inner}</select><button type="button" class="sm ghost addo" data-act="addOpt" data-id="${key}" aria-label="Add a new option">+ Add</button></span>`;
+const modeSel=()=>sA('mode','modes',opts(MODES));
+const memSel=(name,first)=>`<select name="${name}">${first?`<option>${first}</option>`:''}${opts(S.members.map(m=>m.name))}</select>`;
+function addTxn(type,cat,amt,note,by='',date=today,mode='Cash',x={}){const id=uid();S.txns.push({id,date,type,cat,amt:+amt,note,by,mode,...x});return id}
+const hasTxn=id=>!!id&&S.txns.some(t=>t.id===id);
+const addM=(k,n)=>{let[y,m]=k.split('-').map(Number);m+=n;y+=Math.floor((m-1)/12);m=((m-1)%12+12)%12+1;return `${y}-${pad(m)}`};
+const dueIn=(r,m)=>+r.freq===1||((+m.slice(5)-r.start+120)%r.freq===0);
+const nextDue=r=>{for(let i=0;i<24;i++){const m=addM(ym,i);if(dueIn(r,m)&&!hasTxn(r.paid?.[m]))return m}return ''};
+const recState=r=>{if(!dueIn(r,ym))return['due','Next due '+mLab(nextDue(r))];if(hasTxn(r.paid?.[ym]))return['paid',r.dir==='in'?'Received':'Paid'];return dom>r.day?['late','Overdue']:['due','Due '+r.day+' '+curMon]};
+const pending=()=>S.recur.filter(r=>dueIn(r,ym)&&!hasTxn(r.paid?.[ym]));
+const unpaidStaff=()=>S.staff.filter(s=>!hasTxn(s.paid?.[ym]));
+const payForm=(form,id,amt,label)=>`<form class="inl" data-form="${form}"><input type="hidden" name="id" value="${id}"><input type="number" name="amt" value="${amt}" aria-label="Amount"><select name="mode" aria-label="Mode">${opts(MODES)}</select><button class="sm">${label}</button></form>`;
+const amtCell=t=>isIn(t)?['<span class="in">'+INR(t.amt)+'</span>','']:isOut(t)?['','<span class="out">'+INR(t.amt)+'</span>']:['','<span class="muted">'+INR(t.amt)+' internal</span>'];
+
+const V={
+home(){const mt=ofMonth(ym),rec=sum(mt.filter(isIn),t=>t.amt),exp=sum(mt.filter(isOut),t=>t.amt),pr=pending(),us=unpaidStaff(),po=pr.filter(r=>r.dir==='out'),pi=pr.filter(r=>r.dir==='in');
+const todays=S.cleaning.filter(c=>c.days.includes(tIdx)),doneN=todays.filter(c=>S.cleanDone[today+'|'+c.id]).length,six=S.recur.filter(r=>+r.freq!==1);
+const meal=S.menu[wk-1][tIdx];
+return `<div class="grid">
+<div class="card stat"><div class="l">Receipts · ${mName(ym)}</div><div class="n in" data-v="${rec}">${INR(rec)}</div></div>
+<div class="card stat"><div class="l">Expenditure · ${mName(ym)}</div><div class="n out" data-v="${exp}">${INR(exp)}</div></div>
+<div class="card stat"><div class="l">Dues outstanding (${po.length+us.length})</div><div class="n" data-v="${sum(po,r=>r.amt)+sum(us,s=>s.amt)}">${INR(sum(po,r=>r.amt)+sum(us,s=>s.amt))}</div></div>
+<div class="card stat"><div class="l">Receivable – rent etc. (${pi.length})</div><div class="n" data-v="${sum(pi,r=>r.amt)}">${INR(sum(pi,r=>r.amt))}</div></div></div>
+<div class="cols"><div class="card"><h2>Pending this month</h2><ul class="list">
+${pr.map(r=>{const[c,l]=recState(r);return `<li><span class="grow">${esc(r.name)} · <b>${INR(r.amt)}</b></span><span class="tag ${c}">${l}</span><button class="sm" data-act="payRec" data-id="${r.id}">${r.dir==='in'?'Receive':'Pay'}</button></li>`}).join('')}
+${us.map(s=>`<li><span class="grow">Salary – ${esc(s.name)} · <b>${INR(s.amt)}</b></span><button class="sm" data-act="paySal" data-id="${s.id}">Pay</button></li>`).join('')}
+${pr.length+us.length?'':'<li class="muted">All dues for this month are settled.</li>'}</ul>
+<h2 style="margin-top:22px">Upcoming periodic dues</h2><ul class="list">${six.map(r=>`<li><span class="grow">${esc(r.name)}</span><span class="muted">${mLab(nextDue(r))}</span><b>${INR(r.amt)}</b></li>`).join('')||'<li class="muted">None.</li>'}</ul>
+${(()=>{const rs=S.reminders.filter(r=>daysTo(r.due)<=15).sort((a,b)=>a.due.localeCompare(b.due));return rs.length?`<h2 style="margin-top:22px">Reminders · next 15 days</h2><ul class="list">${rs.map(r=>{const[c,l]=remState(r);return `<li><a class="grow" href="#remind">${esc(r.name)}</a><span class="tag ${c}">${l}</span>${r.amt?`<b>${INR(r.amt)}</b>`:''}</li>`}).join('')}</ul>`:''})()}<h2 style="margin-top:22px">Today at home</h2><ul class="list">
+<li><a class="grow" href="#clean">Housekeeping (${DAYL[tIdx]})</a><span class="muted">${doneN} of ${todays.length} done</span></li>
+<li><a class="grow" href="#meals">Today's menu</a><span class="muted">${esc(meal[1])}</span></li>
+<li><a class="grow" href="#tasks">Open tasks</a><span class="muted">${S.work.filter(w=>w.status!=='done').length}</span></li>
+<li><a class="grow" href="#maint">Open maintenance requests</a><span class="muted">${S.repairs.filter(r=>r.status==='open').length}</span></li>
+<li><a class="grow" href="#procure">Items to procure</a><span class="muted">${S.groceries.filter(g=>!g.done).length}</span></li></ul></div>
+<div class="card"><h2>Receipts by source</h2><ul class="list">${IN_CATS.map(c=>[c,sum(mt.filter(t=>isIn(t)&&t.cat===c),t=>t.amt)]).filter(x=>x[1]||[C.led,C.ln,C.rent].includes(x[0])).map(([c,v])=>`<li><span class="grow">${esc(c)}</span><b class="in">${INR(v)}</b></li>`).join('')}</ul>
+<h2 style="margin-top:22px">Recent transactions</h2><ul class="list">${[...S.txns].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7).map(t=>`<li><span class="muted" style="width:3.8em">${dFmt(t.date)}</span><span class="grow">${esc(t.note||t.cat)}</span><b class="${t.type==='tr'?'muted':t.type}">${isIn(t)?'+':isOut(t)?'−':''}${INR(t.amt)}</b></li>`).join('')}</ul></div></div>
+<div class="card" style="margin-top:16px"><h2 class="hrow">Budget vs actual · ${mName(ym)}<button class="sm ghost addo" data-act="addOpt" data-id="budgetCats">+ Add category</button></h2><table class="stack"><thead><tr><th>Category</th><th class="r">Monthly budget</th><th class="r">Spent</th><th class="r">Balance</th><th style="width:30%">Used</th></tr></thead><tbody>
+${BUDGET_CATS.map(c=>{const b=+S.budgets[c]||0,s=spent(c),p=b?Math.min(100,s/b*100):0;return `<tr>${td('Category',esc(c))}<td data-l="Budget" class="r"><input class="ed r" type="number" min="0" value="${b}" data-chg="budget" data-cat="${esc(c)}" aria-label="Budget for ${esc(c)}" style="width:7.5em"></td>${td('Spent',INR(s),'r')}${td('Balance',`<span class="${b-s<0?'out':''}">${INR(b-s)}</span>`,'r')}<td data-l="Used"><div class="meter"><i class="${s>b?'over':''}" style="width:${p}%"></i></div></td></tr>`}).join('')}
+</tbody><tfoot><tr><td>Total</td><td class="r">${INR(sum(BUDGET_CATS,c=>S.budgets[c]))}</td><td class="r">${INR(sum(BUDGET_CATS,c=>spent(c)))}</td><td class="r">${INR(sum(BUDGET_CATS,c=>(+S.budgets[c]||0)-spent(c)))}</td><td></td></tr></tfoot></table></div>`},
+
+ledger(){const months=[...new Set([ym,fMonth,...S.txns.map(t=>t.date.slice(0,7))])].sort().reverse(),rows=ofMonth(fMonth).filter(t=>!fCat||t.cat===fCat).sort((a,b)=>b.date.localeCompare(a.date)),tin=sum(rows.filter(isIn),t=>t.amt),tout=sum(rows.filter(isOut),t=>t.amt);
+return `<div class="card"><h2>Post a transaction</h2><form class="add" data-form="txn">
+<label class="f">Date<input type="date" name="date" value="${today}" required></label>
+<label class="f" style="flex-basis:280px">Category${sA('cat','cat',catOpts(C.gro))}</label>
+<label class="f">Amount (₹)<input type="number" name="amt" min="1" step="1" inputmode="numeric" required></label>
+<label class="f" style="flex-basis:220px">Particulars<input name="note" placeholder="Description"></label>
+<label class="f" style="flex-basis:170px">Mode${modeSel()}</label>
+<label class="f">Member / handled by<input name="by" list="ppl"></label><button>Post entry</button></form>
+<div class="note"><span class="inl"><select data-chg="month" aria-label="Period" style="width:auto">${months.map(m=>`<option value="${m}"${m===fMonth?' selected':''}>${mName(m)}</option>`).join('')}</select><select data-chg="fcat" aria-label="Category filter" style="width:auto"><option value="">All categories</option>${opts([...IN_CATS,...OUT_CATS,C.itr],fCat)}</select></span><span>Receipts <b class="in">${INR(tin)}</b> · Payments <b class="out">${INR(tout)}</b> · Net <b>${INR(tin-tout)}</b></span><button class="sm ghost" data-act="csv">Copy for Excel</button></div>
+${rows.length?`<table class="stack"><thead><tr><th>Date</th><th>Category</th><th>Particulars</th><th>Mode</th><th>Member</th><th class="r">Receipts</th><th class="r">Payments</th><th></th></tr></thead><tbody>
+${rows.map(t=>{const[a,b]=amtCell(t);return `<tr>${td('Date',dFmt(t.date))}${td('Category',esc(t.cat))}${td('Particulars',esc(t.note))}${td('Mode',esc(t.mode))}${td('Member',esc(t.by))}${td('Receipts',a,'r')}${td('Payments',b,'r')}<td class="r"><button class="x" aria-label="Delete entry" data-act="del" data-id="txns:${t.id}">×</button></td></tr>`}).join('')}</tbody></table>`:'<p class="muted">No transactions in this period.</p>'}</div>`},
+
+dues(){const rs=[...S.recur].sort((a,b)=>(a.dir>b.dir?-1:1)||a.day-b.day);return `<div class="card"><h2>Recurring bills, dues & receipts</h2><form class="add" data-form="recur">
+<label class="f" style="flex-basis:220px">Name<input name="name" placeholder="e.g. Chit – second group" required></label>
+<label class="f">Type<select name="dir"><option value="out">Payment</option><option value="in">Receipt</option></select></label>
+<label class="f" style="flex-basis:260px">Category${sA('cat','cat',catOpts('Mobile Bills'))}</label>
+<label class="f">Amount (₹)<input type="number" name="amt" min="0" required></label>
+<label class="f">Due day<input type="number" name="day" min="1" max="31" value="10" required></label>
+<label class="f">Frequency<select name="freq"><option value="1">Monthly</option><option value="3">Every 3 months</option><option value="6">Every 6 months</option><option value="12">Yearly</option></select></label>
+<label class="f">First due month<select name="start">${MONTHS.map((m,i)=>`<option value="${i+1}"${i+1===now.getMonth()+1?' selected':''}>${m}</option>`).join('')}</select></label><button>Add</button></form>
+<table class="stack"><thead><tr><th>Name</th><th>Category</th><th>Frequency</th><th class="r">Due day</th><th class="r">Amount</th><th>Status</th><th></th><th></th></tr></thead><tbody>
+${rs.map(r=>{const[c,l]=recState(r),open=dueIn(r,ym)&&c!=='paid';return `<tr><td data-l="Name">${ed('recur',r.id,'name',r.name,'Name')}</td>${td('Category',`${r.dir==='in'?'<span class="tag paid">Receipt</span> ':''}${esc(r.cat)}`)}${td('Frequency',{1:'Monthly',3:'Quarterly',6:'Every 6 months',12:'Yearly'}[r.freq]+(+r.freq!==1?' from '+MONTHS[r.start-1]:''))}<td data-l="Due day" class="r">${ed('recur',r.id,'day',r.day,'Due day','number')}</td><td data-l="Amount" class="r">${ed('recur',r.id,'amt',r.amt,'Amount','number')}</td>${td('Status',`<span class="tag ${c}">${l}</span>`)}<td data-l="">${open?payForm('payRec',r.id,r.amt,r.dir==='in'?'Receive':'Pay'):''}</td><td class="r"><button class="x" aria-label="Delete" data-act="del" data-id="recur:${r.id}">×</button></td></tr>`}).join('')}</tbody></table>
+<p class="muted">Paying or receiving posts the entry to the Ledger. Property tax is set to fall due in April and October; change the first due month if yours differs. To reverse a payment, delete the ledger entry.</p></div>`},
+
+payroll(){return `<div class="card"><h2>Payroll · ${mName(ym)}</h2><form class="add" data-form="staff">
+<label class="f">Employee name<input name="name" required></label><label class="f" style="flex-basis:220px">Duties<input name="role" placeholder="Cooking, cleaning…"></label><label class="f">Monthly salary (₹)<input type="number" name="amt" min="0" required></label><button>Add employee</button></form>
+<table class="stack"><thead><tr><th>Employee</th><th>Duties</th><th class="r">Salary</th><th>Status</th><th></th><th></th></tr></thead><tbody>
+${S.staff.map(s=>{const t=S.txns.find(x=>x.id===s.paid?.[ym]);return `<tr><td data-l="Employee">${ed('staff',s.id,'name',s.name,'Name')}</td><td data-l="Duties">${ed('staff',s.id,'role',s.role,'Duties')}</td><td data-l="Salary" class="r">${ed('staff',s.id,'amt',s.amt,'Salary','number')}</td>${td('Status',t?`<span class="tag paid">Paid ${INR(t.amt)} · ${dFmt(t.date)}</span>`:'<span class="tag due">Unpaid</span>')}<td data-l="">${t?'':payForm('paySal',s.id,s.amt,'Pay')}</td><td class="r"><button class="x" aria-label="Remove" data-act="del" data-id="staff:${s.id}">×</button></td></tr>`}).join('')}</tbody></table>
+<p class="muted">Monthly payroll: <b>${INR(sum(S.staff,s=>s.amt))}</b>. Replace the placeholder names with your maids' names. Record advances in the Ledger under Staff Salaries.</p></div>`},
+
+family(){const mt=ofMonth(ym),trs=mt.filter(t=>t.frm||t.to).sort((a,b)=>b.date.localeCompare(a.date));
+return `<div class="cols" style="margin-top:0"><div class="card"><h2>Family members (${S.members.length})</h2><table class="stack"><thead><tr><th>Name</th><th>Relation</th><th>Notes</th><th></th></tr></thead><tbody>
+${S.members.map(m=>`<tr><td data-l="Name">${ed('members',m.id,'name',m.name,'Name')}</td><td data-l="Relation">${ed('members',m.id,'rel',m.rel,'Relation')}</td><td data-l="Notes">${ed('members',m.id,'note',m.note,'Notes')}</td><td class="r"><button class="x" aria-label="Remove member" data-act="del" data-id="members:${m.id}">×</button></td></tr>`).join('')}</tbody></table>
+<form class="add" data-form="member" style="margin:14px 0 0"><label class="f">Name<input name="name" required></label><label class="f">Relation<input name="rel" placeholder="Cousin, uncle…"></label><label class="f" style="flex-basis:180px">Notes<input name="note"></label><button>Add member</button></form><p class="muted">Type real names over the placeholders; tasks, schedules and ledger entries update with them.</p></div>
+<div class="card"><h2>Record a family transfer</h2><form class="add" data-form="transfer">
+<label class="f">Date<input type="date" name="date" value="${today}"></label><label class="f">From${sA('frm','member',`<option>${HF}</option>${opts(S.members.map(m=>m.name))}`)}</label><label class="f">To${sA('to','member',`${opts(S.members.map(m=>m.name))}<option>${HF}</option>`)}</label>
+<label class="f">Amount (₹)<input type="number" name="amt" min="1" required></label><label class="f" style="flex-basis:170px">Mode${modeSel()}</label><label class="f" style="flex-basis:200px">Purpose<input name="note" placeholder="Allowance, loan return…"></label><button>Record</button></form>
+<p class="muted">From or to the house fund changes the closing balance. Between two members it is recorded for reference only.</p></div></div>
+<div class="card" style="margin-top:16px"><h2>Member summary · ${mName(ym)}</h2><table class="stack"><thead><tr><th>Member</th><th class="r">Expenses handled</th><th class="r">Personal expenses</th><th class="r">From house fund</th><th class="r">Internal received</th><th class="r">Internal given</th></tr></thead><tbody>
+${S.members.map(m=>{const n=m.name,f=x=>sum(mt.filter(x),t=>t.amt);return `<tr>${td('Member','<b>'+esc(n)+'</b>')}${td('Expenses handled',INR(f(t=>isOut(t)&&t.by===n&&t.cat!==C.fout)),'r')}${td('Personal',INR(f(t=>isOut(t)&&t.by===n&&t.cat===C.pers)),'r')}${td('From house fund',INR(f(t=>t.cat===C.fout&&t.to===n)),'r')}${td('Internal received',INR(f(t=>t.type==='tr'&&t.to===n)),'r')}${td('Internal given',INR(f(t=>t.type==='tr'&&t.frm===n)),'r')}</tr>`}).join('')}</tbody></table>
+<h2 style="margin-top:22px">Transfers this month</h2>${trs.length?`<ul class="list">${trs.map(t=>`<li><span class="muted" style="width:3.8em">${dFmt(t.date)}</span><span class="grow">${esc(t.frm)} → ${esc(t.to)} <span class="muted">${esc(t.note)}</span></span><b>${INR(t.amt)}</b><button class="x" aria-label="Delete" data-act="del" data-id="txns:${t.id}">×</button></li>`).join('')}</ul>`:'<p class="muted">No transfers this month.</p>'}</div>`},
+
+procure(){const secs=[...new Set([...S.opts.secs,...S.groceries.map(x=>x.sec||C.gro)])];return `<div class="cols" style="margin-top:0"><div class="card"><h2>Procurement list</h2><form class="add" data-form="groc"><label class="f" style="flex-basis:200px">Item<input name="item" required></label><label class="f">Quantity<input name="qty" placeholder="2 kg"></label><label class="f" style="flex-basis:220px">Section${sA('sec','secs',opts(S.opts.secs))}</label><button>Add item</button></form>
+${secs.map(sec=>{const g=S.groceries.filter(x=>(x.sec||C.gro)===sec).sort((a,b)=>a.done-b.done);return `<h3>${sec}</h3><ul class="list">${g.map(x=>`<li class="${x.done?'done':''}"><input type="checkbox" data-chg="groc" data-id="${x.id}" aria-label="Purchased ${esc(x.item)}"${x.done?' checked':''}><span class="grow">${esc(x.item)} <span class="muted">${esc(x.qty)}</span></span><button class="x" aria-label="Delete" data-act="del" data-id="groceries:${x.id}">×</button></li>`).join('')||'<li class="muted">No items.</li>'}</ul>`}).join('')}
+${S.groceries.some(x=>x.done)?'<p><button class="ghost sm" data-act="clearBought">Clear purchased items</button></p>':''}</div>
+<div class="card"><h2>Record a purchase</h2><form class="add" data-form="purchase"><label class="f" style="flex-basis:240px">Category${sA('cat','outCats',opts(FORM_OUT,C.gro))}</label><label class="f">Amount (₹)<input type="number" name="amt" min="1" required></label><label class="f">Vendor<input name="note" placeholder="Supermarket, rythu bazaar…"></label><label class="f" style="flex-basis:170px">Mode${modeSel()}</label><label class="f">Purchased by<input name="by" list="ppl"></label><button>Post to ledger</button></form>
+<table><thead><tr><th>This month</th><th class="r">Spent</th><th class="r">Budget left</th></tr></thead><tbody>${[C.gro,C.fv,C.med].map(c=>{const l=(+S.budgets[c]||0)-spent(c);return `<tr><td>${c}</td><td class="r">${INR(spent(c))}</td><td class="r ${l<0?'out':''}">${INR(l)}</td></tr>`}).join('')}</tbody></table></div></div>`},
+
+clean(){return `<div class="card"><h2>Weekly housekeeping schedule</h2><form class="add" data-form="clean"><label class="f" style="flex-basis:220px">Task<input name="task" required></label><label class="f">Responsible<input name="who" list="ppl" required></label><label class="f" style="flex-basis:170px">Time${sA('time','slots',opts(SLOTS))}</label><div class="days">${DAYS.map((d,i)=>`<label><input type="checkbox" name="day" value="${i}">${d}</label>`).join('')}</div><button>Add task</button></form>
+<div class="scroll"><table class="clean"><thead><tr><th>Task</th><th>Responsible</th><th>Time</th>${DAYS.map((d,i)=>`<th class="d${i===tIdx?' t':''}">${i===tIdx?'Today':d}</th>`).join('')}<th></th></tr></thead><tbody>
+${[...new Set([...SLOTS,...S.cleaning.map(c=>c.time||'Morning')])].map(sl=>S.cleaning.filter(c=>(c.time||'Morning')===sl).map(c=>`<tr><td>${esc(c.task)}</td><td>${esc(c.who)}</td><td class="muted">${sl}</td>${DAYS.map((d,i)=>`<td class="d${i===tIdx?' t':''}">${c.days.includes(i)?(i===tIdx?`<input type="checkbox" data-chg="clean" data-id="${c.id}" aria-label="Done today"${S.cleanDone[today+'|'+c.id]?' checked':''}>`:'<span class="dot"></span>'):''}</td>`).join('')}<td class="r"><button class="x" aria-label="Delete" data-act="del" data-id="cleaning:${c.id}">×</button></td></tr>`).join('')).join('')}</tbody></table></div>
+<p class="muted">Tick today's column as each task is completed.</p></div>
+<div class="card" style="margin-top:16px"><h2>Monthly housekeeping · ${mName(ym)}</h2><form class="add" data-form="monthly"><label class="f" style="flex-basis:240px">Task<input name="task" required></label><label class="f">Responsible<input name="who" list="ppl" required></label><label class="f">Week<select name="week">${[1,2,3,4].map(w=>`<option value="${w}">Week ${w}</option>`).join('')}</select></label><button>Add</button></form>
+<ul class="list">${[...S.monthly].sort((a,b)=>a.week-b.week).map(m=>{const d=S.mDone[ym+'|'+m.id];return `<li class="${d?'done':''}"><input type="checkbox" data-chg="mdone" data-id="${m.id}" aria-label="Done"${d?' checked':''}><span class="tag ${m.week==wk?'late':'due'}">Week ${m.week}</span><span class="grow">${esc(m.task)} <span class="muted">· ${esc(m.who)}</span></span><button class="x" aria-label="Delete" data-act="del" data-id="monthly:${m.id}">×</button></li>`}).join('')}</ul></div>`},
+
+meals(){const W=S.menu[mWeek-1],ML=['Breakfast','Lunch','Evening snack','Dinner'];return `<div class="card"><h2>Meal plan · 4-week monthly rotation</h2>
+<div class="seg">${[1,2,3,4].map(w=>`<button class="sm ${w===mWeek?'':'ghost'}" data-act="week" data-id="${w}">Week ${w}${w===wk?' (this week)':''}</button>`).join('')}</div>
+<table class="stack menu"><thead><tr><th>Day</th>${ML.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>
+${DAYL.map((d,i)=>`<tr class="${mWeek===wk&&i===tIdx?'t':''}">${td('Day','<b>'+d+'</b>'+(mWeek===wk&&i===tIdx?' <span class="muted">today</span>':''))}${ML.map((m,j)=>`<td data-l="${m}"><input class="ed" value="${esc(W[i][j])}" data-chg="menu" data-w="${mWeek-1}" data-d="${i}" data-m="${j}" aria-label="${d} ${m}"></td>`).join('')}</tr>`).join('')}</tbody></table>
+<p class="muted">Week 1 = days 1–7 of the month, week 2 = 8–14, week 3 = 15–21, week 4 = 22nd to month end. Click any dish to change it.</p>
+<h3>Kitchen notes</h3><textarea data-chg="menuNotes" rows="3" aria-label="Kitchen notes">${esc(S.menuNotes)}</textarea></div>`},
+
+tasks(){const col=(st,t)=>`<div class="card"><h2>${t} <span class="muted">${S.work.filter(w=>w.status===st).length}</span></h2>${S.work.filter(w=>w.status===st).sort((a,b)=>(a.due||'z').localeCompare(b.due||'z')).map(w=>`<div class="item ${st==='done'?'done':''}"><div class="row"><b class="grow">${esc(w.task)}</b><button class="x" aria-label="Delete" data-act="del" data-id="work:${w.id}">×</button></div><div class="row"><span class="muted">${esc(w.who)}${w.due?' · due '+dFmt(w.due):''}${st!=='done'&&w.due&&w.due<today?' · <span class="out">overdue</span>':''}</span><button class="sm ghost" data-act="next" data-id="${w.id}">${st==='todo'?'Start':st==='doing'?'Complete':'Reopen'}</button></div></div>`).join('')||'<p class="muted">Nothing here.</p>'}</div>`;
+return `<div class="card" style="margin-bottom:16px"><h2>Assign a task</h2><form class="add" data-form="work" style="margin:0"><label class="f" style="flex-basis:240px">Task<input name="task" required></label><label class="f">Assigned to<input name="who" list="ppl" required></label><label class="f">Due date<input type="date" name="due"></label><button>Assign task</button></form></div><div class="board">${col('todo','Pending')}${col('doing','In progress')}${col('done','Completed')}</div>`},
+
+design(){const D=S.design,seg=(k,vals)=>`<div><h3>${k==='density'?'Spacing':'Corners'}</h3><div class="seg">${vals.map(([v,l])=>`<button class="sm ${D[k]===v?'':'ghost'}" data-act="dopt" data-id="${k}:${v}" aria-pressed="${D[k]===v}">${l}</button>`).join('')}</div></div>`;
+return `<div class="card"><h2>Choose a design</h2><p class="muted" style="margin-top:-4px">Tap a design to apply it to the whole app straight away. Your choice is saved for everyone in the family. All designs use Arial.</p>
+<div class="themes">${THEMES.map(th=>{const dk=!!th.dark,v=th.v,c=k=>lv(v[k],dk),st=`--pm:${c('m')};--pg:${c('g')};--pbg:${th.pbg||c('bg')};--pp:${dk?'#171b21':'#fff'};--pi:${dk?'#e8ecf1':'#1f2328'};--ph:${c('hink')};--p2:${c('m2')};--pb:${c('btn')};--pbt:${c('btnt')};border-radius:${D.corners==='rounded'?'10px':'3px'}`;
+return `<button class="sw" data-act="theme" data-id="${th.id}" aria-pressed="${D.theme===th.id}" style="${st}"><div class="pv"><div class="pvs"><b>₹53,420</b><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="pvm"><div class="pvc"><i>Receipts</i><i>Expenses</i></div><div class="pvr"><span class="a" style="width:80%"></span><span style="width:55%"></span><span style="width:35%"></span></div><span class="pvbtn">Pay</span></div></div><div class="swt"><b>${th.name}${D.theme===th.id?' · in use':''}</b><span class="muted">${th.d}</span></div></button>`}).join('')}</div>
+<div class="optrow">${seg('density',[['comfortable','Comfortable'],['compact','Compact']])}${seg('corners',[['square','Square'],['rounded','Rounded']])}</div></div>`},
+loans(){const tx=(id,c)=>S.txns.filter(t=>t.ref===id&&(!c||t.cat===c)),ch=S.loans.filter(x=>x.kind==='chit'),ln=S.loans.filter(x=>x.kind==='loan');
+const chit=x=>{const n=(+x.before||0)+tx(x.id,'Chit Payments').length,m=+x.months||1,paid=tx(x.id,'Chit Payments').some(t=>t.date.startsWith(ym)),p=Math.min(100,n/m*100);return `<div class="card"><div class="hrow"><h2 style="border:0;margin:0;padding:0">${esc(x.name)}</h2><button class="x" aria-label="Delete" data-act="del" data-id="loans:${x.id}">×</button></div><p class="muted" style="margin:2px 0 12px">${esc(x.org)} · chit value ${INR(x.value)} · ${INR(x.inst)} a month</p>
+<div class="kv"><span>Instalments paid</span><b>${n} of ${m}</b><span>Paid so far</span><b>${INR(n*x.inst)}</b><span>Still to pay</span><b>${INR(Math.max(0,m-n)*x.inst)}</b><span>Status</span><b>${x.lifted?`<span class="tag paid">Lifted · ${INR(x.liftAmt)}</span>`:'<span class="tag due">Not lifted</span>'}</b></div>
+<div class="meter" style="margin:12px 0"><i style="width:${p}%"></i></div>
+<div class="acts">${paid?`<span class="tag paid">${mName(ym)} instalment paid</span>`:payForm('payChit',x.id,x.inst,'Pay instalment')}${x.lifted?'':`<form class="inl" data-form="liftChit"><input type="hidden" name="id" value="${x.id}"><input type="number" name="amt" value="${x.value}" aria-label="Amount received"><button class="sm ghost">Mark lifted</button></form>`}</div></div>`};
+const loan=x=>{const rep=sum(tx(x.id,'Loan Repayment'),t=>t.amt),out=Math.max(0,(+x.principal||0)-rep),mi=Math.round(out*(+x.rate||0)/100),ip=sum(tx(x.id,'Interest Payments'),t=>t.amt),paid=tx(x.id,'Interest Payments').some(t=>t.date.startsWith(ym));return `<div class="card"><div class="hrow"><h2 style="border:0;margin:0;padding:0">${esc(x.name)}</h2><button class="x" aria-label="Delete" data-act="del" data-id="loans:${x.id}">×</button></div><p class="muted" style="margin:2px 0 12px">Principal ${INR(x.principal)} · ${esc(x.rate)}% a month</p>
+<div class="kv"><span>Outstanding principal</span><b class="out">${INR(out)}</b><span>Interest this month</span><b>${INR(mi)}</b><span>Interest paid (recorded)</span><b>${INR(ip)}</b><span>Principal repaid</span><b class="in">${INR(rep)}</b></div>
+<div class="meter" style="margin:12px 0"><i style="width:${x.principal?Math.min(100,rep/x.principal*100):0}%"></i></div>
+<div class="acts">${paid?`<span class="tag paid">${mName(ym)} interest paid</span>`:payForm('payInt',x.id,mi,'Pay interest')}<form class="inl" data-form="repay"><input type="hidden" name="id" value="${x.id}"><input type="number" name="amt" min="1" placeholder="Amount ₹" aria-label="Principal repaid" required><button class="sm ghost">Repay principal</button></form></div></div>`};
+return `<div class="board">${ch.map(chit).join('')}${ln.map(loan).join('')}</div>${ch.length+ln.length?'':'<p class="muted">No chits or loans yet.</p>'}
+<div class="cols"><div class="card"><h2>Add a chit group</h2><form class="add" data-form="chit"><label class="f" style="flex-basis:200px">Chit name<input name="name" required placeholder="₹5 lakh group"></label><label class="f">Organiser<input name="org"></label><label class="f">Chit value (₹)<input type="number" name="value" min="0" required></label><label class="f">Monthly instalment (₹)<input type="number" name="inst" min="0" required></label><label class="f">Total months<input type="number" name="months" min="1" required></label><label class="f">Already paid (months)<input type="number" name="before" min="0" value="0"></label><button>Add chit</button></form></div>
+<div class="card"><h2>Add a loan</h2><form class="add" data-form="loan"><label class="f" style="flex-basis:200px">Lender / loan name<input name="name" required></label><label class="f">Principal (₹)<input type="number" name="principal" min="0" required></label><label class="f">Interest % per month<input type="number" name="rate" min="0" step="0.01" required></label><button>Add loan</button></form>
+<p class="muted">Payments made here go to the Ledger and also tick the matching line in Bills & Dues, so nothing is counted twice.</p></div></div>`},
+
+remind(){const rs=[...S.reminders].sort((a,b)=>a.due.localeCompare(b.due)),RP={none:'One time',1:'Monthly',3:'Every 3 months',6:'Every 6 months',12:'Yearly'};
+return `<div class="card"><h2>Add a reminder</h2><form class="add" data-form="remind"><label class="f" style="flex-basis:220px">What<input name="name" required placeholder="Car insurance renewal"></label><label class="f" style="flex-basis:220px">Type${sA('type','remCats',opts(S.opts.remCats))}</label><label class="f">Due date<input type="date" name="due" value="${today}" required></label><label class="f">Repeats<select name="repeat">${Object.entries(RP).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label><label class="f">Amount (₹)<input type="number" name="amt" min="0"></label><label class="f" style="flex-basis:240px">Ledger category${sA('lcat','outCats',opts(FORM_OUT,'Miscellaneous'))}</label><button>Add reminder</button></form>
+${rs.length?`<table class="stack"><thead><tr><th>Reminder</th><th>Type</th><th>Due</th><th>Repeats</th><th class="r">Amount</th><th>Status</th><th></th><th></th></tr></thead><tbody>${rs.map(r=>{const[c,l]=remState(r);return `<tr>${td('Reminder','<b>'+esc(r.name)+'</b>')}${td('Type',esc(r.type))}${td('Due',dFmt(r.due)+' '+r.due.slice(0,4))}${td('Repeats',RP[r.repeat]||'One time')}${td('Amount',r.amt?INR(r.amt):'','r')}${td('Status',`<span class="tag ${c}">${l}</span>`)}<td data-l="">${r.amt?payForm('payRem',r.id,r.amt,'Pay & done'):''} <button class="sm ghost" data-act="doneRem" data-id="${r.id}">Done</button></td><td class="r"><button class="x" aria-label="Delete" data-act="del" data-id="reminders:${r.id}">×</button></td></tr>`}).join('')}</tbody></table>`:'<p class="muted">No reminders yet.</p>'}
+<p class="muted">Repeating reminders move to their next date when marked done. Pay & done posts the amount to the Ledger.</p></div>`},
+
+reports(){const years=[...new Set([today.slice(0,4),...S.txns.map(t=>t.date.slice(0,4))])].sort().reverse(),Y=rYear,yt=S.txns.filter(t=>t.date.startsWith(Y)),ti=sum(yt.filter(isIn),t=>t.amt),to=sum(yt.filter(isOut),t=>t.amt);
+const ms=MONTHS.map((m,i)=>{const k=`${Y}-${pad(i+1)}`,mt=yt.filter(t=>t.date.startsWith(k));return[m,sum(mt.filter(isIn),t=>t.amt),sum(mt.filter(isOut),t=>t.amt)]});
+const byCat=f=>{const m={};for(const t of yt.filter(f))m[t.cat]=(m[t.cat]||0)+t.amt;return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+const bars=(rows,tot)=>{const mx=Math.max(1,...rows.map(r=>r[1]));return rows.map(([c,v])=>`<div class="bar"><span>${esc(c)}</span><i style="width:${v/mx*100}%"></i><span class="r">${INR(v)}</span></div>`).join('')||'<p class="muted">Nothing recorded.</p>'};
+return `<div class="note"><label class="inl">Year <select data-chg="ryear" style="width:auto">${years.map(y=>`<option${y===Y?' selected':''}>${y}</option>`).join('')}</select></label><span>Receipts <b class="in">${INR(ti)}</b> · Payments <b class="out">${INR(to)}</b> · Net <b>${INR(ti-to)}</b></span></div>
+<div class="cols" style="margin-top:0"><div class="card"><h2>Month by month · ${Y}</h2><table><thead><tr><th>Month</th><th class="r">Receipts</th><th class="r">Payments</th><th class="r">Net</th></tr></thead><tbody>${ms.map(([m,a,b])=>`<tr><td>${m}</td><td class="r in">${a?INR(a):'–'}</td><td class="r out">${b?INR(b):'–'}</td><td class="r">${a||b?INR(a-b):'–'}</td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="r">${INR(ti)}</td><td class="r">${INR(to)}</td><td class="r">${INR(ti-to)}</td></tr></tfoot></table></div>
+<div class="card"><h2>Where money came from</h2>${bars(byCat(isIn))}<h2 style="margin-top:22px">Where money went</h2>${bars(byCat(isOut))}</div></div>`},
+
+lists(){return `<div class="board">${LISTS.map(([k,t])=>`<div class="card"><h2>${t} <span class="muted">${S.opts[k].length}</span></h2><div class="chipset">${S.opts[k].map((v,i)=>`<span class="opt">${esc(v)}${LOCK.has(v)&&k!=='budgetCats'?'<small>built-in</small>':`<button class="x" aria-label="Remove ${esc(v)}" data-act="rmOpt" data-id="${k}|${i}">×</button>`}</span>`).join('')}</div>
+<form class="add" data-form="opt" style="margin:12px 0 0"><input type="hidden" name="k" value="${k}">${k==='budgetCats'?`<label class="f" style="flex-basis:200px">Category<select name="name">${opts(FORM_OUT.filter(c=>!BUDGET_CATS.includes(c)))}</select></label><label class="f">Monthly budget (₹)<input type="number" name="amt" min="0" value="0"></label>`:`<label class="f" style="flex-basis:200px">New option<input name="name" required></label>`}<button>Add</button></form></div>`).join('')}</div>
+<p class="muted">Removing an option only hides it from dropdowns; past entries keep their category. Built-in options are used by automatic posting and can't be removed.</p>`},
+
+maint(){const r=[...S.repairs].sort((a,b)=>(a.status==='done')-(b.status==='done')||b.date.localeCompare(a.date));return `<div class="card"><h2>Maintenance log – house, vehicles & commercial space</h2><form class="add" data-form="repair"><label class="f" style="flex-basis:240px">Issue / work order<input name="item" required></label><label class="f" style="flex-basis:240px">Asset${sA('asset','assets',opts(ASSETS))}</label><label class="f">Reported<input type="date" name="date" value="${today}"></label><button>Log request</button></form>
+<table class="stack"><thead><tr><th>Issue</th><th>Asset</th><th>Reported</th><th>Status</th><th class="r">Cost</th><th></th></tr></thead><tbody>
+${r.map(x=>`<tr>${td('Issue','<b>'+esc(x.item)+'</b>')}${td('Asset',esc(x.asset))}${td('Reported',dFmt(x.date))}${td('Status',x.status==='done'?'<span class="tag paid">Closed</span>':`<form class="inl" data-form="fix"><input type="hidden" name="id" value="${x.id}"><input type="number" name="cost" min="0" placeholder="Cost ₹" aria-label="Cost"><select name="mode" aria-label="Mode">${opts(MODES)}</select><button class="sm">Close</button></form>`)}${td('Cost',x.status==='done'?INR(x.cost):'','r')}<td class="r"><button class="x" aria-label="Delete" data-act="del" data-id="repairs:${x.id}">×</button></td></tr>`).join('')}</tbody></table>
+<p class="muted">Closing with a cost posts it to the Ledger: vehicles under Vehicle Maintenance, everything else under House Repairs & Maintenance.</p></div>`}};
+
+function render(){if(role==='family'){renderFamily();return}applyDesign();syncOpts();if(role==='loading'||role==='admin'&&!(gotMain&&gotTx)){$('#root').innerHTML=`<div class="loading"><b>Household Accounts</b><span>${esc(status||'Loading…')}</span></div>`;return}if(role==='none'){$('#root').innerHTML='<div class="loading"><b>Household Accounts</b><span>Please sign in to Claude to use this app.</span></div>';return}const TB=TABS.filter(t=>role==='admin'||!['approvals','access'].includes(t[0])),v=TB.some(t=>t[0]===location.hash.slice(1))?location.hash.slice(1):'home',mt=ofMonth(ym),changed=v!==lastV,first=lastV===null;lastV=v;
+const cnt={dues:pending().length,payroll:unpaidStaff().length,procure:S.groceries.filter(g=>!g.done).length,tasks:S.work.filter(w=>w.status!=='done').length,maint:S.repairs.filter(r=>r.status==='open').length,remind:S.reminders.filter(r=>daysTo(r.due)<=7).length,approvals:pendingAll().length};
+$('#root').innerHTML=`<div class="app"><aside class="side"><div class="brand"><b>Household Accounts</b><span>Family of ${S.members.length} · Lalitha Event Decors & Lalitha Naturals</span></div>
+<div class="sbal"><span>Closing balance</span><b data-v="${bal()}">${INR(bal())}</b><small>${mName(ym)}: in ${INR(sum(mt.filter(isIn),t=>t.amt))} · out ${INR(sum(mt.filter(isOut),t=>t.amt))}</small></div>
+<div class="snav" role="navigation" aria-label="Sections">${TB.map(([k,l])=>`<a href="#${k}"${k===v?' aria-current="page"':''}>${ico(k)}<span>${l}</span>${cnt[k]?`<em class="cnt">${cnt[k]}</em>`:''}</a>`).join('')}</div>
+<div class="sfoot" id="st">${esc(status)}</div></aside>
+<div class="mainc${changed?' enter':''}"><header class="top"><div><h1>${(TABS.find(t=>t[0]===v)||TABS[0])[1]}</h1><p class="muted">${SUB[v]||''}</p></div><div class="chips"><span class="chip">${DAYL[tIdx]}, ${dFmt(today)}</span><span class="chip">Week ${wk} of ${mName(ym)}</span></div></header>
+<main>${role==='local'?'<div class="note"><span><b>Device-only version.</b> Entries are saved in this browser on this device only, with no logins or sharing. For shared family accounts with admin and family access, use the Claude version.</span></div>':''}${S.sample?'<div class="note"><span>Amounts and November entries are sample figures based on your description. Clear the entries to start your own books; the family, dues, payroll, schedules and meal plan stay so you only correct the amounts and names.</span><button class="sm" data-act="clearSample">Clear sample entries</button></div>':''}${readOnly?'<div class="note">You can view these accounts but not change them. Ask the owner for edit access.</div>':''}${V[v]()}</main></div></div>
+<div class="dlg" id="dlg" hidden></div><datalist id="ppl">${people().map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`;
+if(first)countUp('.sbal [data-v], main [data-v]');else if(changed)countUp('main [data-v]')}
+function countUp(sel){if(!window.requestAnimationFrame||matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.querySelectorAll(sel).forEach(el=>{const to=+el.dataset.v,t0=performance.now(),d=800;const step=t=>{const p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3);el.textContent=INR(to*e);if(p<1)requestAnimationFrame(step)};el.textContent=INR(0);requestAnimationFrame(step)})}
+
+function setStatus(s){status=s;const e=$('#st');if(e)e.textContent=s}
+function toast(msg,undo){const t=$('#toast');t.innerHTML='';const s=document.createElement('span');s.textContent=msg;t.append(s);if(undo){const b=document.createElement('button');b.textContent='Undo';b.onclick=()=>{if(undoSnap){S=JSON.parse(undoSnap);fix();undoSnap=null;render();queue()}t.classList.remove('on')};t.append(b)}t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),6000)}
+function commit(fn,msg,undo,noRender){if(readOnly){toast('These accounts are view-only for you.');return}undoSnap=JSON.stringify(S);fn();if(!noRender)render();queue();if(msg)toast(msg,undo)}
+function queue(){setStatus('Saving…');clearTimeout(saveT);saveT=setTimeout(save,900)}
+
+
+const daysTo=d=>Math.round((new Date(d+'T00:00')-new Date(today+'T00:00'))/864e5);
+const remState=r=>{const n=daysTo(r.due);return n<0?['late',`Overdue ${-n}d`]:n===0?['late','Due today']:n<=7?['due',`In ${n} day${n>1?'s':''}`]:['due',dFmt(r.due)]};
+const addMonthsD=(d,n)=>{const x=new Date(d+'T00:00'),day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+n);x.setDate(Math.min(day,new Date(x.getFullYear(),x.getMonth()+1,0).getDate()));return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`};
+const markLinked=(id,tid)=>{const r=S.recur.find(r=>r.link===id);if(r&&dueIn(r,ym)&&!hasTxn(r.paid?.[ym])){r.paid=r.paid||{};r.paid[ym]=tid}};
+let rYear=today.slice(0,4),dlgO=null;
+const DLG={cat:'New category',modes:'New payment mode',secs:'New procurement section',assets:'New asset',slots:'New time slot',remCats:'New reminder type',outCats:'New payment category',member:'New family member',budgetCats:'Add a budgeted category'};
+function openDlg(key,b){const f=b.closest('form');dlgO={key,f:f?.dataset.form||'',n:b.parentElement.querySelector('select')?.name||''};const d=$('#dlg');
+const body=key==='cat'?`<label class="f">Name<input name="name" required></label><div class="seg" style="margin:10px 0 0"><label class="rad"><input type="radio" name="type" value="out" checked> Payment</label><label class="rad"><input type="radio" name="type" value="in"> Receipt</label></div>`
+:key==='member'?`<label class="f">Name<input name="name" required></label><label class="f" style="margin-top:10px">Relation<input name="rel"></label>`
+:key==='budgetCats'?`<label class="f">Category<select name="name">${opts(FORM_OUT.filter(c=>!BUDGET_CATS.includes(c)))}</select></label><label class="f" style="margin-top:10px">Monthly budget (₹)<input type="number" name="amt" min="0" value="0"></label>`
+:`<label class="f">Name<input name="name" required></label>`;
+d.innerHTML=`<form class="card dlgc" data-form="dlg"><h2>${DLG[key]||'Add option'}</h2>${body}<div class="acts" style="margin-top:16px;justify-content:flex-end"><button type="button" class="ghost" data-act="closeDlg">Cancel</button><button>Add</button></div></form>`;d.hidden=false;d.querySelector('input,select')?.focus()}
+function closeDlg(){const d=$('#dlg');if(d){d.hidden=true;d.innerHTML=''}}
+function addOpt(k,v){v=(v||'').trim();if(!v)return false;const all=k==='inCats'||k==='outCats'?[...FORM_IN,...FORM_OUT]:S.opts[k];if(all.some(x=>x.toLowerCase()===v.toLowerCase())){toast('That option already exists');return false}S.opts[k].push(v);return v}
+function keepForms(fn,setVal){const snap=[...document.querySelectorAll('#root form.add [name]')].filter(el=>el.type!=='hidden').map(el=>({f:el.form.dataset.form,n:el.name,v:el.value,c:el.checked,t:el.type}));fn();
+for(const s of snap){const sel=`#root form.add[data-form="${s.f}"] [name="${s.n}"]`+(s.t==='checkbox'||s.t==='radio'?`[value="${CSS.escape(s.v)}"]`:'');const el=document.querySelector(sel);if(!el)continue;if(s.t==='checkbox'||s.t==='radio')el.checked=s.c;else el.value=s.v}
+if(setVal&&dlgO){const el=document.querySelector(`#root form.add[data-form="${dlgO.f}"] select[name="${dlgO.n}"]`);if(el)el.value=setVal}}
+const rec=id=>S.recur.find(x=>x.id===id),stf=id=>S.staff.find(x=>x.id===id);
+const F={
+member(d){commit(()=>S.members.push({id:uid(),name:d.name.trim(),rel:d.rel.trim(),note:d.note.trim()}),'Member added')},
+opt(d){const k=d.k;if(k==='budgetCats'){if(!d.name)return;commit(()=>{if(!S.opts.budgetCats.includes(d.name))S.opts.budgetCats.push(d.name);S.budgets[d.name]=+d.amt||0},'Added to budget')}else{const s=JSON.stringify(S.opts);if(!addOpt(k,d.name))return;S.opts=JSON.parse(s);syncOpts();commit(()=>addOpt(k,d.name),'Option added',true)}},
+dlg(d){const o=dlgO;if(!o)return;let val=d.name?.trim();const s=JSON.stringify(S);
+if(o.key==='member'){if(S.members.some(m=>m.name.toLowerCase()===val.toLowerCase())){toast('That member already exists');return}keepForms(()=>commit(()=>S.members.push({id:uid(),name:val,rel:(d.rel||'').trim(),note:''}),'Member added',true),val)}
+else if(o.key==='budgetCats'){if(!val)return;commit(()=>{if(!S.opts.budgetCats.includes(val))S.opts.budgetCats.push(val);S.budgets[val]=+d.amt||0},'Added to budget')}
+else{const k=o.key==='cat'?(d.type==='in'?'inCats':'outCats'):o.key;if(!addOpt(k,val))return;S=JSON.parse(s);fix();keepForms(()=>commit(()=>addOpt(k,val),'Added: '+val,true),val)}dlgO=null},
+chit(d){commit(()=>S.loans.push({id:uid(),kind:'chit',name:d.name.trim(),org:d.org.trim(),value:+d.value,inst:+d.inst,months:+d.months,before:+d.before||0,lifted:false}),'Chit added')},
+loan(d){commit(()=>S.loans.push({id:uid(),kind:'loan',name:d.name.trim(),principal:+d.principal,rate:+d.rate}),'Loan added')},
+payChit(d){const x=S.loans.find(l=>l.id===d.id);commit(()=>{const t=addTxn('out','Chit Payments',d.amt,x.name+' — instalment '+mName(ym),'',today,d.mode||'Cash',{ref:x.id});markLinked(x.id,t)},'Chit instalment paid',true)},
+liftChit(d){const x=S.loans.find(l=>l.id===d.id);commit(()=>{x.lifted=true;x.liftAmt=+d.amt||0;if(x.liftAmt)addTxn('in','Chit Amount Received',x.liftAmt,x.name+' — chit lifted','',today,'Bank Transfer',{ref:x.id})},'Chit marked lifted',true)},
+payInt(d){const x=S.loans.find(l=>l.id===d.id);commit(()=>{const t=addTxn('out','Interest Payments',d.amt,x.name+' — interest '+mName(ym),'',today,d.mode||'Cash',{ref:x.id});markLinked(x.id,t)},'Interest paid',true)},
+repay(d){const x=S.loans.find(l=>l.id===d.id);commit(()=>addTxn('out','Loan Repayment',d.amt,x.name+' — principal repaid','',today,'Bank Transfer',{ref:x.id}),'Principal repayment recorded',true)},
+remind(d){commit(()=>S.reminders.push({id:uid(),name:d.name.trim(),type:d.type,due:d.due,repeat:d.repeat,amt:+d.amt||0,lcat:d.lcat}),'Reminder added')},
+payRem(d){const r=S.reminders.find(x=>x.id===d.id);commit(()=>{addTxn('out',r.lcat||'Miscellaneous',d.amt,r.name,'',today,d.mode||'Cash');doneR(r)},'Paid and marked done',true)},
+txn(d){commit(()=>addTxn(IN_CATS.includes(d.cat)?'in':'out',d.cat,d.amt,d.note.trim(),d.by.trim(),d.date,d.mode),'Entry posted to ledger')},
+recur(d){commit(()=>S.recur.push({id:uid(),dir:d.dir,name:d.name.trim(),cat:d.cat,amt:+d.amt,day:+d.day,freq:+d.freq,start:+d.start,paid:{}}),'Added')},
+payRec(d){const r=rec(d.id);commit(()=>{r.paid=r.paid||{};r.paid[ym]=addTxn(r.dir,r.cat,d.amt,r.name+' — '+mName(ym),'',today,d.mode||'Cash',r.link?{ref:r.link}:{})},`${r.name} ${r.dir==='in'?'received':'paid'} — posted to ledger`,true)},
+staff(d){commit(()=>S.staff.push({id:uid(),name:d.name.trim(),role:d.role.trim(),amt:+d.amt,paid:{}}),'Employee added')},
+paySal(d){const s=stf(d.id);commit(()=>{s.paid=s.paid||{};s.paid[ym]=addTxn('out',C.sal,d.amt,`${s.name} — ${mName(ym)}`,'',today,d.mode||'Cash')},`Salary paid to ${s.name}`,true)},
+transfer(d){if(d.frm===d.to){toast('Choose two different parties');return}const x={frm:d.frm,to:d.to},note=d.note.trim();
+commit(()=>{if(d.frm===HF)addTxn('out',C.fout,d.amt,`To ${d.to}${note?': '+note:''}`,d.to,d.date||today,d.mode,x);else if(d.to===HF)addTxn('in',C.fin,d.amt,`From ${d.frm}${note?': '+note:''}`,d.frm,d.date||today,d.mode,x);else addTxn('tr',C.itr,d.amt,`${d.frm} → ${d.to}${note?': '+note:''}`,d.frm,d.date||today,d.mode,x)},'Transfer recorded',true)},
+groc(d){commit(()=>S.groceries.push({id:uid(),item:d.item.trim(),qty:d.qty.trim(),sec:d.sec,done:false}))},
+purchase(d){commit(()=>addTxn('out',d.cat,d.amt,d.note.trim()||d.cat,d.by.trim(),today,d.mode),'Purchase posted to ledger',true)},
+clean(d,days){if(!days.length){toast('Pick at least one day');return}commit(()=>S.cleaning.push({id:uid(),task:d.task.trim(),who:d.who.trim(),time:d.time,days:days.map(Number)}),'Task added')},
+monthly(d){commit(()=>S.monthly.push({id:uid(),task:d.task.trim(),who:d.who.trim(),week:+d.week}),'Monthly task added')},
+work(d){commit(()=>S.work.push({id:uid(),task:d.task.trim(),who:d.who.trim(),due:d.due,status:'todo'}),'Task assigned')},
+repair(d){commit(()=>S.repairs.push({id:uid(),item:d.item.trim(),asset:d.asset,date:d.date||today,status:'open',cost:0}),'Request logged')},
+fix(d){const r=S.repairs.find(x=>x.id===d.id),c=+d.cost||0;commit(()=>{r.status='done';r.cost=c;if(c)r.txn=addTxn('out',r.asset==='Vehicle'?C.veh:C.hrep,c,r.item+' ('+r.asset+')','',today,d.mode)},'Request closed',true)}};
+const doneR=r=>{if(r.repeat&&r.repeat!=='none')r.due=addMonthsD(r.due,+r.repeat);else S.reminders=S.reminders.filter(x=>x!==r)};
+const A={
+addOpt(k,b){openDlg(k,b)},
+closeDlg(){closeDlg();dlgO=null},
+rmOpt(x){const[k,i]=x.split('|');commit(()=>S.opts[k].splice(+i,1),'Option removed',true)},
+doneRem(id){const r=S.reminders.find(x=>x.id===id);commit(()=>doneR(r),r.repeat&&r.repeat!=='none'?'Moved to next date':'Reminder completed',true)},
+payRec(id){F.payRec({id,amt:rec(id).amt})},
+paySal(id){F.paySal({id,amt:stf(id).amt})},
+del(key){const[k,id]=key.split(':');commit(()=>S[k]=S[k].filter(x=>x.id!==id),'Deleted',true)},
+next(id){const w=S.work.find(x=>x.id===id);commit(()=>{w.status=w.status==='todo'?'doing':w.status==='doing'?'done':'todo';tick('tasks',w.id,w.status)})},
+week(id){mWeek=+id;render()},
+theme(id){commit(()=>S.design.theme=id,'Design applied: '+(THEMES.find(x=>x.id===id)||{}).name,true)},
+dopt(x){const[k,v]=x.split(':');commit(()=>S.design[k]=v)},
+clearBought(){commit(()=>S.groceries=S.groceries.filter(g=>!g.done),'Cleared purchased items',true)},
+clearSample(){commit(()=>{S.txns=[];S.sample=false;for(const r of S.recur)r.paid={};for(const s of S.staff)s.paid={};for(const r of S.repairs)delete r.txn;S.repairs=S.repairs.filter(r=>r.status!=='done');S.work=S.work.filter(w=>w.status!=='done')},'Sample entries cleared',true)},
+async csv(){const rows=ofMonth(fMonth).filter(t=>!fCat||t.cat===fCat).sort((a,b)=>a.date.localeCompare(b.date)),q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+const txt=[['Date','Category','Particulars','Mode','Member','Receipts','Payments','Internal'].join('\t'),...rows.map(t=>[t.date,t.cat,t.note,t.mode,t.by,isIn(t)?t.amt:'',isOut(t)?t.amt:'',t.type==='tr'?t.amt:''].map(v=>String(v??'').replace(/[\t\n]/g,' ')).join('\t'))].join('\n');
+try{await navigator.clipboard.writeText(txt);toast('Copied — paste into Excel or Google Sheets')}catch{toast('Copy was blocked by the browser')}}};
+const uid_=uid;
+/* ---------- roles, storage, family app ---------- */
+const MODS=[['expense','Add expenses','Post a payment with category, amount and mode'],['receipt','Add receipts','Record money received'],['purchase','Record purchases','Grocery, vegetables or medicine bills'],['shop','Shopping list','See the list, tick items bought, ask for new items'],['maint','Maintenance requests','Report something that needs repair'],['clean','Housekeeping','See the schedule and tick today\'s jobs'],['meals','Meal plan','See the weekly menu'],['tasks','My tasks','See jobs assigned to them and update them']];
+const MODL=Object.fromEntries(MODS.map(m=>[m[0],m[1]]));
+const DEFPERM=()=>({name:'',blocked:false,auto:false,max:5000,member:'',cats:[],mods:{expense:true,receipt:false,purchase:true,shop:true,maint:true,clean:true,meals:true,tasks:true}});
+let db=null,U=null,me=null,role='loading',ACC={users:{},defaults:DEFPERM()},TK={cleanDone:{},groc:{},tasks:{}},TKP={},INBOX={},HOME=null,MYBOX=null,PROF={};
+const last={main:null,months:{},home:'',acc:''};let MDATA={},gotMain=false,gotTx=false,saving=false,again=false,famSub=false,boxQ=Promise.resolve();
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const normAcc=a=>{a=a&&typeof a==='object'?JSON.parse(JSON.stringify(a)):{};a.users=a.users||{};a.defaults=Object.assign(DEFPERM(),a.defaults||{});a.defaults.mods=Object.assign(DEFPERM().mods,a.defaults.mods||{});for(const k in a.users){const d=DEFPERM();a.users[k]=Object.assign(d,a.users[k]);a.users[k].mods=Object.assign(d.mods,a.users[k].mods||{})}return a};
+const permOf=uid=>ACC.users[uid]||ACC.defaults;
+const uName=uid=>(ACC.users[uid]?.name)||PROF[uid]||'Family member';
+const errMsg=e=>{const c=e?.code||'';return c==='quota_exceeded'?'Storage is full — delete old entries':c==='invalid_argument'?'Not allowed to save here':c==='revoked'?'Access was removed':'Could not save — check your connection'};
+function applyTicks(){S.cleanDone={};for(const[k,v]of Object.entries(TK.cleanDone||{}))if(v)S.cleanDone[k]=true;for(const g of S.groceries||[])if(g.id in(TK.groc||{}))g.done=!!TK.groc[g.id];for(const w of S.work||[])if(w.id in(TK.tasks||{}))w.status=TK.tasks[w.id]}
+function tick(part,key,val){TKP[part]=TKP[part]||{};TKP[part][key]=val;TK[part]=TK[part]||{};TK[part][key]=val}
+async function saveTicks(){if(!Object.keys(TKP).length)return;const p=TKP;TKP={};const ref=db.doc('ticks/home');try{await ref.update(p)}catch(e){if(e?.code==='invalid_argument')await ref.set(Object.assign({cleanDone:{},groc:{},tasks:{}},p));else throw e}}
+const homeDoc=()=>({design:S.design,members:S.members.map(m=>({name:m.name})),cleaning:S.cleaning,monthly:S.monthly,menu:S.menu,menuNotes:S.menuNotes,groceries:S.groceries.map(({id,item,qty,sec})=>({id,item,qty,sec})),work:S.work.map(({id,task,who,due})=>({id,task,who,due})),repairs:S.repairs.map(({id,item,asset,date,status})=>({id,item,asset,date,status})),opts:{inCats:S.opts.inCats,outCats:S.opts.outCats,modes:S.opts.modes,secs:S.opts.secs,assets:S.opts.assets}});
+async function save(){await ready;
+if(role==='local'){try{localStorage.setItem('hh-accounts-v3',JSON.stringify(S));setStatus('Saved on this device only')}catch{setStatus('Not saved (preview)')}return}
+if(role!=='admin')return;if(saving){again=true;return}saving=true;setStatus('Saving…');
+try{const{txns,cleanDone,...rest}=S,main=JSON.stringify(rest);
+if(main!==last.main){await db.doc('books/main').set(JSON.parse(main));last.main=main}
+const by={};for(const t of S.txns)(by[t.date.slice(0,7)]=by[t.date.slice(0,7)]||[]).push(t);
+for(const m of new Set([...Object.keys(by),...Object.keys(last.months)])){const body={list:by[m]||[]},js=JSON.stringify(body);if(js!==last.months[m]){await db.doc('books/main/txns/'+m).set(body);last.months[m]=js}}
+const h=JSON.stringify(homeDoc());if(h!==last.home){await db.doc('shared/home').set(JSON.parse(h));last.home=h}
+await saveTicks();setStatus('All changes saved')}catch(e){setStatus(errMsg(e))}finally{saving=false;saveT=null;if(again){again=false;save()}}}
+let accT=null;function saveAcc(){clearTimeout(accT);accT=setTimeout(async()=>{const js=JSON.stringify(ACC);if(js===last.acc)return;try{await db.doc('shared/access').set(JSON.parse(js));last.acc=js;setStatus('Access saved')}catch(e){setStatus(errMsg(e))}},500)}
+function snapRender(){if(role==='family'){renderFamily();return}if(!gotMain||!gotTx)return;keepForms(render)}
+function startAdmin(){role='admin';setStatus('Loading your books…');const tm=setTimeout(()=>{if(!gotMain)setStatus('Can’t reach the saved data yet');},10000);
+const err=e=>{clearTimeout(tm);setStatus(errMsg(e))};
+db.doc('books/main').onSnapshot(s=>{if(s.metadata.hasPendingWrites)return;const d=s.exists?s.data():{};const js=JSON.stringify(d);if(js===last.main)return;if(saveT&&gotMain)return;last.main=js;const tx=S.txns||[];S=JSON.parse(js);S.txns=tx;fix();applyTicks();if(!s.metadata.fromCache)clearTimeout(tm);gotMain=true;setStatus('All changes saved');snapRender()},err);
+db.collection('books/main/txns').onSnapshot(q=>{if(q.metadata.hasPendingWrites)return;let ch=!gotTx;const seen=new Set();for(const d of q.docs){seen.add(d.id);const js=JSON.stringify(d.data());if(last.months[d.id]!==js){if(saveT&&gotTx)continue;last.months[d.id]=js;MDATA[d.id]=d.data().list||[];ch=true}}for(const k of Object.keys(MDATA))if(!seen.has(k)){delete MDATA[k];delete last.months[k];ch=true}if(ch){S.txns=Object.values(MDATA).flat();gotTx=true;snapRender()}},err);
+db.doc('shared/access').onSnapshot(s=>{ACC=normAcc(s.exists?s.data():{});last.acc=JSON.stringify(ACC);snapRender()},()=>{});
+db.doc('ticks/home').onSnapshot(s=>{const d=s.exists?s.data():{};TK={cleanDone:d.cleanDone||{},groc:d.groc||{},tasks:d.tasks||{}};for(const p in TKP)Object.assign(TK[p],TKP[p]);if(gotMain){applyTicks();snapRender()}},()=>{});
+db.collection('inbox').onSnapshot(q=>{INBOX={};for(const d of q.docs)INBOX[d.id]=d.data();loadNames(Object.keys(INBOX));autoApprove();snapRender()},()=>{});
+db.doc('shared/home').get().then(s=>{if(s.exists)last.home=JSON.stringify(s.data())}).catch(()=>{})}
+async function loadNames(ids){if(!U?.profiles)return;const need=ids.filter(i=>!(i in PROF));if(!need.length)return;try{const ps=await U.profiles(need);for(const i of need)PROF[i]=ps?.[i]?.name||'';snapRender()}catch{}}
+/* entry validation shared by family form and admin approval */
+function flagsOf(uid,e){const p=permOf(uid),f=[],d=e.data||{};if(p.blocked)f.push('User is blocked');if(!p.mods[e.kind])f.push(`${MODL[e.kind]||e.kind} is switched off for this person`);if(['expense','purchase'].includes(e.kind)&&p.cats.length&&!p.cats.includes(d.cat))f.push('Category not allowed');if(['expense','receipt','purchase'].includes(e.kind)&&p.max&&+d.amt>p.max)f.push('Above limit of '+INR(p.max));return f}
+function applyEntry(uid,e){const d=e.data||{},by=d.by||permOf(uid).member||uName(uid),src={src:uid,eid:e.id};
+if(e.kind==='expense'||e.kind==='purchase')addTxn('out',d.cat,+d.amt,d.note||d.cat,by,d.date||today,d.mode||'Cash',src);
+else if(e.kind==='receipt')addTxn('in',d.cat,+d.amt,d.note||d.cat,by,d.date||today,d.mode||'Cash',src);
+else if(e.kind==='shop')S.groceries.push({id:uid_(),item:d.item,qty:d.qty||'',sec:d.sec||S.opts.secs[0],done:false});
+else if(e.kind==='maint')S.repairs.push({id:uid_(),item:d.item,asset:d.asset||'House',date:d.date||today,status:'open',cost:0});
+S.processed=S.processed||{};S.processed[e.id]=1}
+async function setBox(uid,fn){const ref=db.doc('inbox/'+uid),box=INBOX[uid]||{entries:[]},entries=fn(JSON.parse(JSON.stringify(box.entries||[])));INBOX[uid]={...box,entries};try{await ref.update({entries})}catch(e){setStatus(errMsg(e))}}
+async function decide(uid,eid,ok,why){const e=(INBOX[uid]?.entries||[]).find(x=>x.id===eid);if(!e||e.status!=='pending')return;
+if(ok&&!(S.processed||{})[eid])commit(()=>applyEntry(uid,e),null,false,true);
+await setBox(uid,es=>es.map(x=>x.id===eid?{...x,status:ok?'approved':'rejected',why:why||'',by:me,at2:new Date().toISOString()}:x).filter(x=>x.status==='pending'||Date.now()-new Date(x.at2||x.at).getTime()<60*864e5));render()}
+let autoBusy=false;async function autoApprove(){if(role!=='admin'||!gotMain||!gotTx||autoBusy)return;autoBusy=true;try{for(const[uid,box]of Object.entries(INBOX)){const p=permOf(uid);if(!p.auto)continue;const es=(box.entries||[]).filter(e=>e.status==='pending'&&!flagsOf(uid,e).length);if(!es.length)continue;
+const l=await db.doc('inbox/'+uid).acquire({holder:me||'admin',ttlMs:15000}).catch(()=>({acquired:false}));if(!l.acquired)continue;for(const e of es)await decide(uid,e.id,true)}}finally{autoBusy=false}}
+const pendingAll=()=>Object.entries(INBOX).flatMap(([uid,b])=>(b.entries||[]).filter(e=>e.status==='pending').map(e=>[uid,e]));
+const entryText=e=>{const d=e.data||{};return e.kind==='shop'?`${esc(d.item)} ${d.qty?'· '+esc(d.qty):''} <span class="muted">(${esc(d.sec||'')})</span>`:e.kind==='maint'?`${esc(d.item)} <span class="muted">· ${esc(d.asset||'')}</span>`:`<b>${INR(d.amt)}</b> · ${esc(d.cat)} <span class="muted">· ${esc(d.note||'')} · ${esc(d.mode||'')} · ${dFmt(d.date)}</span>`};
+
+/* ---------- admin pages ---------- */
+Object.assign(V,{
+approvals(){const pa=pendingAll(),recent=Object.entries(INBOX).flatMap(([uid,b])=>(b.entries||[]).filter(e=>e.status!=='pending').map(e=>[uid,e])).sort((a,b)=>(b[1].at2||'').localeCompare(a[1].at2||'')).slice(0,15);
+return `<div class="card"><h2 class="hrow"><span>Waiting for approval <span class="muted">${pa.length}</span></span>${pa.some(([u,e])=>!flagsOf(u,e).length)?'<button class="sm" data-act="approveAll">Approve all without warnings</button>':''}</h2>
+${pa.length?`<table class="stack"><thead><tr><th>From</th><th>Type</th><th>Details</th><th>Sent</th><th>Checks</th><th></th></tr></thead><tbody>${pa.map(([uid,e])=>{const f=flagsOf(uid,e);return `<tr>${td('From','<b>'+esc(uName(uid))+'</b>')}${td('Type',esc(MODL[e.kind]||e.kind))}${td('Details',entryText(e))}${td('Sent',dFmt((e.at||'').slice(0,10)))}${td('Checks',f.length?f.map(x=>`<span class="tag late">${esc(x)}</span>`).join(' '):'<span class="tag paid">OK</span>')}<td class="r" data-l=""><span class="acts" style="justify-content:flex-end"><button class="sm" data-act="approve" data-id="${uid}|${e.id}">Approve</button><button class="sm ghost" data-act="reject" data-id="${uid}|${e.id}">Reject</button></span></td></tr>`}).join('')}</tbody></table>`:'<p class="muted">Nothing waiting. New entries from family members appear here.</p>'}</div>
+<div class="card" style="margin-top:16px"><h2>Recently decided</h2>${recent.length?`<ul class="list">${recent.map(([uid,e])=>`<li><span class="tag ${e.status==='approved'?'paid':'late'}">${e.status==='approved'?'Approved':'Rejected'}</span><span class="grow">${esc(uName(uid))} · ${esc(MODL[e.kind]||e.kind)} · ${entryText(e)}</span></li>`).join('')}</ul>`:'<p class="muted">None yet.</p>'}</div>`},
+
+access(){const ids=[...new Set([...Object.keys(INBOX),...Object.keys(ACC.users)])].filter(i=>i!==me);
+const row=(key,p,label,seen)=>`<div class="card ucard"><div class="hrow"><div><h2 style="border:0;margin:0;padding:0">${label}</h2><p class="muted" style="margin:2px 0 0">${seen}</p></div>${key==='__def'?'':`<span class="tag ${p.blocked?'late':'paid'}">${p.blocked?'Blocked':'Active'}</span>`}</div>
+<div class="ugrid">${key==='__def'?'':`<label class="f">Display name<input data-chg="acc" data-u="${key}" data-f="name" value="${esc(p.name)}" placeholder="e.g. Mother"></label>`}
+<label class="f">Family member<select data-chg="acc" data-u="${key}" data-f="member"><option value="">—</option>${opts(S.members.map(m=>m.name),p.member)}</select></label>
+<label class="f">Max per entry (₹, 0 = no limit)<input type="number" min="0" data-chg="acc" data-u="${key}" data-f="max" value="${+p.max||0}"></label>
+<label class="f">Entries<select data-chg="acc" data-u="${key}" data-f="auto"><option value="0"${p.auto?'':' selected'}>Need my approval</option><option value="1"${p.auto?' selected':''}>Post automatically if within limits</option></select></label></div>
+<h3>Modules</h3><div class="mods">${MODS.map(([m,l,dsc])=>`<label class="mod"><input type="checkbox" data-chg="accmod" data-u="${key}" data-m="${m}"${p.mods[m]?' checked':''}><span><b>${l}</b><small>${dsc}</small></span></label>`).join('')}</div>
+<details class="cats"><summary>Allowed expense categories: ${p.cats.length?p.cats.length+' selected':'all'}</summary><div class="mods">${FORM_OUT.map(c=>`<label class="mod sm"><input type="checkbox" data-chg="acccat" data-u="${key}" data-c="${esc(c)}"${p.cats.includes(c)?' checked':''}><span>${esc(c)}</span></label>`).join('')}</div><p class="muted">Tick none to allow every category.</p></details>
+${key==='__def'?'':`<div class="acts" style="margin-top:12px"><button class="sm ghost" data-act="block" data-id="${key}">${p.blocked?'Unblock':'Block'} this person</button>${INBOX[key]?'':`<button class="sm ghost" data-act="forget" data-id="${key}">Remove</button>`}</div>`}</div>`;
+return `<div class="card"><h2>How access works</h2><div class="steps"><div><b>1 · Admins</b><span>You are the owner. On the app's Share menu, give your brother <b>Editor</b>. Editors see and change everything, including this page.</span></div><div><b>2 · Family</b><span>Share with each family member as <b>Contributor</b>. They can only submit entries in the modules you switch on below. Money pages, balances and reports stay hidden. The database blocks them, not just the screen.</span></div><div><b>3 · Approve</b><span>Each person appears here after opening the app once. Set their modules and limits. Their entries wait on the Approvals page unless you choose automatic posting.</span></div></div></div>
+<div class="board" style="margin-top:16px">${ids.map(i=>row(i,permOf(i),esc(uName(i)),INBOX[i]?.seen?'Last opened '+dFmt(INBOX[i].seen):'Not opened yet')).join('')}${row('__def',ACC.defaults,'Defaults for new people','Used until you change someone’s settings')}</div>
+${ids.length?'':'<p class="muted" style="margin-top:12px">No family members have opened the app yet.</p>'}`}});
+SUB.approvals='Entries sent by family members';SUB.access='Who can enter what, and limits for each person';
+Object.assign(ICON,{approvals:'<path d="M4 13l4 4L20 5"/><path d="M4 19h16"/>',access:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M17 3l2 2 3-3"/>'});
+function accUser(key,create){if(key==='__def')return ACC.defaults;if(!ACC.users[key]){if(!create)return permOf(key);ACC.users[key]=JSON.parse(JSON.stringify(ACC.defaults));ACC.users[key].name=PROF[key]||''}return ACC.users[key]}
+Object.assign(A,{approve(x){const[u,e]=x.split('|');decide(u,e,true)},reject(x){const[u,e]=x.split('|');decide(u,e,false)},
+async approveAll(){for(const[u,e]of pendingAll())if(!flagsOf(u,e).length)await decide(u,e.id,true);toast('Approved')},
+block(u){const p=accUser(u,true);p.blocked=!p.blocked;saveAcc();render()},forget(u){delete ACC.users[u];saveAcc();render()}});
+
+/* ---------- family app ---------- */
+const FT=[['f-expense','expense','Add expense','ledger'],['f-receipt','receipt','Add receipt','loans'],['f-purchase','purchase','Record purchase','procure'],['f-shop','shop','Shopping list','procure'],['f-maint','maint','Maintenance','maint'],['f-clean','clean','Housekeeping','clean'],['f-meals','meals','Meal plan','meals'],['f-tasks','tasks','My tasks','tasks'],['f-mine',null,'My entries','approvals']];
+async function startFamily(){role='family';setStatus('Loading…');renderFamily();const ref=db.doc('inbox/'+me);
+try{const s=await ref.get();if(!s.exists)await ref.set({seen:today,entries:[]});else if(s.data().seen!==today)await ref.update({seen:today})}catch(e){readOnly=true}
+db.doc('inbox/'+me).onSnapshot(s=>{MYBOX=s.exists?s.data():{entries:[]};renderFamily()},()=>{});
+db.doc('shared/home').onSnapshot(s=>{HOME=s.exists?s.data():null;if(HOME?.design)S.design=HOME.design;setStatus('Ready');renderFamily()},()=>{});
+db.doc('shared/access').onSnapshot(s=>{ACC=normAcc(s.exists?s.data():{});renderFamily()},()=>{});
+db.doc('ticks/home').onSnapshot(s=>{const d=s.exists?s.data():{};TK={cleanDone:d.cleanDone||{},groc:d.groc||{},tasks:d.tasks||{}};renderFamily()},()=>{})}
+let famLast=null;
+function renderFamily(){applyDesign();const P=permOf(me),H=HOME||{},items=FT.filter(([,m])=>!m||P.mods[m]),h=location.hash.slice(1),v=items.some(i=>i[0]===h)?h:(items[0]?.[0]||'f-mine'),changed=v!==famLast;famLast=v;
+const mine=(MYBOX?.entries||[]).slice().reverse(),pend=mine.filter(e=>e.status==='pending').length,o=H.opts||DEF,cats=P.cats.length?P.cats:(o.outCats||[]);
+const form=(kind,catList,defCat,title)=>`<div class="card"><h2>${title}</h2><form class="add" data-form="fentry"><input type="hidden" name="kind" value="${kind}"><label class="f">Date<input type="date" name="date" value="${today}" required></label><label class="f" style="flex-basis:240px">Category<select name="cat">${opts(catList,defCat)}</select></label><label class="f">Amount (₹)<input type="number" name="amt" min="1" ${P.max?`max="${P.max}"`:''} required></label><label class="f" style="flex-basis:220px">Particulars<input name="note" placeholder="What was it for?"></label><label class="f">Mode<select name="mode">${opts(o.modes||DEF.modes)}</select></label><button>Send</button></form>${P.max?`<p class="muted">Limit per entry: ${INR(P.max)}.</p>`:''}<p class="muted">${P.auto?'Entries within your limits are posted automatically.':'An admin checks each entry before it is added.'}</p></div>`;
+const page={
+'f-expense':()=>form('expense',cats,cats[0],'Add an expense'),
+'f-receipt':()=>form('receipt',(o.inCats||[]),(o.inCats||[])[0],'Add money received'),
+'f-purchase':()=>form('purchase',[C.gro,C.fv,C.med].filter(c=>!P.cats.length||P.cats.includes(c)),C.gro,'Record a purchase'),
+'f-shop':()=>{const g=H.groceries||[],secs=[...new Set([...(o.secs||[]),...g.map(x=>x.sec)])];return `<div class="cols" style="margin-top:0"><div class="card"><h2>Shopping list</h2>${secs.map(sec=>{const L=g.filter(x=>x.sec===sec);return L.length?`<h3>${esc(sec)}</h3><ul class="list">${L.map(x=>{const dn=!!TK.groc?.[x.id];return `<li class="${dn?'done':''}"><input type="checkbox" data-chg="ftick" data-p="groc" data-id="${x.id}"${dn?' checked':''} aria-label="Bought ${esc(x.item)}"><span class="grow">${esc(x.item)} <span class="muted">${esc(x.qty)}</span></span></li>`}).join('')}</ul>`:''}).join('')||'<p class="muted">The list is empty.</p>'}</div>
+<div class="card"><h2>Ask for an item</h2><form class="add" data-form="fentry"><input type="hidden" name="kind" value="shop"><label class="f" style="flex-basis:200px">Item<input name="item" required></label><label class="f">Quantity<input name="qty"></label><label class="f">Section<select name="sec">${opts(o.secs||DEF.secs)}</select></label><button>Send</button></form></div></div>`},
+'f-maint':()=>`<div class="card"><h2>Report a repair</h2><form class="add" data-form="fentry"><input type="hidden" name="kind" value="maint"><label class="f" style="flex-basis:260px">What needs fixing<input name="item" required></label><label class="f">Where<select name="asset">${opts(o.assets||DEF.assets)}</select></label><input type="hidden" name="date" value="${today}"><button>Send</button></form>
+<h3>Open requests</h3><ul class="list">${(H.repairs||[]).filter(r=>r.status==='open').map(r=>`<li><span class="grow">${esc(r.item)} <span class="muted">· ${esc(r.asset)}</span></span><span class="muted">${dFmt(r.date)}</span></li>`).join('')||'<li class="muted">None open.</li>'}</ul></div>`,
+'f-clean':()=>{const cl=H.cleaning||[],td_=cl.filter(c=>(c.days||[]).includes(tIdx));return `<div class="card"><h2>Today · ${DAYL[tIdx]}</h2><ul class="list">${td_.map(c=>{const k=today+'|'+c.id,dn=!!TK.cleanDone?.[k];return `<li class="${dn?'done':''}"><input type="checkbox" data-chg="ftick" data-p="cleanDone" data-id="${k}"${dn?' checked':''} aria-label="Done"><span class="grow">${esc(c.task)} <span class="muted">· ${esc(c.who)} · ${esc(c.time||'')}</span></span></li>`}).join('')||'<li class="muted">Nothing scheduled today.</li>'}</ul></div>
+<div class="card" style="margin-top:16px"><h2>This week</h2><div class="scroll"><table class="clean"><thead><tr><th>Task</th><th>Who</th>${DAYS.map((d,i)=>`<th class="d${i===tIdx?' t':''}">${d}</th>`).join('')}</tr></thead><tbody>${cl.map(c=>`<tr><td>${esc(c.task)}</td><td>${esc(c.who)}</td>${DAYS.map((d,i)=>`<td class="d${i===tIdx?' t':''}">${(c.days||[]).includes(i)?'<span class="dot"></span>':''}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`},
+'f-meals':()=>{const W=(H.menu||[])[mWeek-1]||[],ML=['Breakfast','Lunch','Evening snack','Dinner'];return `<div class="card"><h2>Meal plan</h2><div class="seg">${[1,2,3,4].map(w=>`<button class="sm ${w===mWeek?'':'ghost'}" data-act="fweek" data-id="${w}">Week ${w}${w===wk?' (this week)':''}</button>`).join('')}</div><table class="stack menu"><thead><tr><th>Day</th>${ML.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>${DAYL.map((d,i)=>`<tr class="${mWeek===wk&&i===tIdx?'t':''}">${td('Day','<b>'+d+'</b>')}${ML.map((m,j)=>td(m,esc((W[i]||[])[j]||''))).join('')}</tr>`).join('')}</tbody></table>${H.menuNotes?`<p class="muted">${esc(H.menuNotes)}</p>`:''}</div>`},
+'f-tasks':()=>{const ws=(H.work||[]).filter(w=>!P.member||w.who===P.member);return `<div class="card"><h2>${P.member?'Tasks for '+esc(P.member):'Household tasks'}</h2>${ws.map(w=>{const st=TK.tasks?.[w.id]||'todo';return `<div class="item ${st==='done'?'done':''}"><div class="row"><b class="grow">${esc(w.task)}</b><span class="tag ${st==='done'?'paid':st==='doing'?'due':'late'}">${st==='done'?'Completed':st==='doing'?'In progress':'Pending'}</span></div><div class="row"><span class="muted">${esc(w.who)}${w.due?' · due '+dFmt(w.due):''}</span><button class="sm ghost" data-act="ftask" data-id="${w.id}">${st==='todo'?'Start':st==='doing'?'Complete':'Reopen'}</button></div></div>`}).join('')||'<p class="muted">No tasks assigned.</p>'}</div>`},
+'f-mine':()=>`<div class="card"><h2>My entries</h2>${mine.length?`<ul class="list">${mine.map(e=>`<li><span class="tag ${e.status==='approved'?'paid':e.status==='rejected'?'late':'due'}">${e.status==='approved'?'Added':e.status==='rejected'?'Not accepted':'Waiting'}</span><span class="grow">${esc(MODL[e.kind]||e.kind)} · ${entryText(e)}</span></li>`).join('')}</ul>`:'<p class="muted">You have not sent anything yet.</p>'}</div>`};
+const title=(FT.find(f=>f[0]===v)||[])[2]||'Household';
+$('#root').innerHTML=`<div class="app"><aside class="side"><div class="brand"><b>Household</b><span>${esc(P.name||PROF[me]||'Family member')} · family entry</span></div>
+<div class="sbal"><span>Your entries</span><b>${pend} waiting</b><small>${mine.filter(e=>e.status==='approved').length} added · ${mine.filter(e=>e.status==='rejected').length} not accepted</small></div>
+<div class="snav" role="navigation" aria-label="Sections">${items.map(([k,,l,ic])=>`<a href="#${k}"${k===v?' aria-current="page"':''}>${ico(ic)}<span>${l}</span>${k==='f-mine'&&pend?`<em class="cnt">${pend}</em>`:''}</a>`).join('')}</div><div class="sfoot" id="st">${esc(status)}</div></aside>
+<div class="mainc${changed?' enter':''}"><header class="top"><div><h1>${title}</h1><p class="muted">${role==='loading'?'Loading…':'Enter details here. Admins see and approve them.'}</p></div><div class="chips"><span class="chip">${DAYL[tIdx]}, ${dFmt(today)}</span></div></header>
+<main>${P.blocked?'<div class="note">Your access is paused. Please ask an admin.</div>':readOnly?'<div class="note">You can look but not send entries. Ask the owner to share the app with you as Contributor.</div>':''}${!HOME&&role==='family'?'<div class="note">Waiting for an admin to finish setting up.</div>':''}${P.blocked?'':(page[v]||page['f-mine'])()}</main></div></div>`}
+function sendEntry(kind,data){const P=permOf(me),e={id:uid_(),at:new Date().toISOString(),kind,data,status:'pending'};const f=flagsOf(me,e);if(f.length){toast(f[0]);return}if(readOnly){toast('You can’t send entries yet');return}
+MYBOX=MYBOX||{entries:[]};const entries=[...(MYBOX.entries||[]),e];MYBOX={...MYBOX,entries};renderFamily();setStatus('Sending…');
+boxQ=boxQ.then(()=>db.doc('inbox/'+me).update({entries})).then(()=>{setStatus('Sent');toast(P.auto?'Sent — it will be posted automatically':'Sent for approval')}).catch(err=>{setStatus(errMsg(err));toast('Could not send — try again')})}
+async function famTick(part,key,val){if(readOnly)return;tick(part,key,val);renderFamily();const p=TKP;TKP={};try{await db.doc('ticks/home').update(p)}catch(e){try{await db.doc('ticks/home').set(Object.assign({cleanDone:{},groc:{},tasks:{}},p))}catch(e2){toast('Could not save that tick')}}}
+
+Object.assign(F,{fentry(d){const{kind,...data}=d;if(data.amt!=null)data.amt=+data.amt;sendEntry(kind,data)}});
+Object.assign(A,{fweek(w){mWeek=+w;renderFamily()},ftask(id){const c=TK.tasks?.[id]||'todo';famTick('tasks',id,c==='todo'?'doing':c==='doing'?'done':'todo')}});
+const ready=(async()=>{for(let i=0;i<30&&!window.claude?.use;i++)await sleep(100);
+try{if(window.claude?.use)[db,U]=await Promise.all([window.claude.use('db'),window.claude.use('user')])}catch{db=null}
+if(!db){role='local';try{const l=localStorage.getItem('hh-accounts-v3');if(l){S=JSON.parse(l);fix()}}catch{}setStatus('Preview — saved on this device only');render();return}
+try{me=U?await U.id():null}catch{}let adm=false;try{adm=!!(U&&await U.canEdit())}catch{}
+if(adm)startAdmin();else if(!me){role='none';render()}else startFamily()})();
+const root=$('#root');
+root.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(e.target),d={};for(const[k,v]of fd)if(k!=='day')d[k]=v;F[e.target.dataset.form]?.(d,fd.getAll('day'))});
+root.addEventListener('click',e=>{if(e.target.id==='dlg'){closeDlg();dlgO=null;return}const b=e.target.closest('[data-act]');if(b){e.preventDefault();A[b.dataset.act]?.(b.dataset.id,b)}});
+root.addEventListener('change',e=>{const t=e.target,k=t.dataset.chg;if(!k)return;
+if(k==='month'){fMonth=t.value;render()}
+else if(k==='acc'){const p=accUser(t.dataset.u,true),f=t.dataset.f;p[f]=f==='max'?Math.max(0,+t.value||0):f==='auto'?t.value==='1':t.value;saveAcc();if(f!=='name')render()}
+else if(k==='accmod'){accUser(t.dataset.u,true).mods[t.dataset.m]=t.checked;saveAcc()}
+else if(k==='acccat'){const p=accUser(t.dataset.u,true),c=t.dataset.c;p.cats=t.checked?[...new Set([...p.cats,c])]:p.cats.filter(x=>x!==c);saveAcc();const sm=t.closest('details')?.querySelector('summary');if(sm)sm.textContent='Allowed expense categories: '+(p.cats.length?p.cats.length+' selected':'all')}
+else if(k==='ftick')famTick(t.dataset.p,t.dataset.id,t.checked);
+else if(k==='ryear'){rYear=t.value;render()}
+else if(k==='fcat'){fCat=t.value;render()}
+else if(k==='groc'){const g=S.groceries.find(x=>x.id===t.dataset.id);commit(()=>{g.done=t.checked;tick('groc',g.id,t.checked)})}
+else if(k==='clean')commit(()=>{const key=today+'|'+t.dataset.id;if(t.checked)S.cleanDone[key]=true;else delete S.cleanDone[key];tick('cleanDone',key,t.checked);for(const x in S.cleanDone)if(x.slice(0,10)<today)delete S.cleanDone[x]});
+else if(k==='mdone')commit(()=>{const key=ym+'|'+t.dataset.id;if(t.checked)S.mDone[key]=true;else delete S.mDone[key]});
+else if(k==='budget')commit(()=>S.budgets[t.dataset.cat]=Math.max(0,+t.value||0));
+else if(k==='menu')commit(()=>S.menu[+t.dataset.w][+t.dataset.d][+t.dataset.m]=t.value,null,false,true);
+else if(k==='menuNotes')commit(()=>S.menuNotes=t.value,null,false,true);
+else if(k==='edit'){const o=S[t.dataset.k].find(x=>x.id===t.dataset.id),f=t.dataset.f,num=t.type==='number';if(!o)return;const old=o[f],val=num?Math.max(0,+t.value||0):t.value.trim();if(!num&&!val){t.value=old;return}
+commit(()=>{o[f]=val;if(f==='name'&&(t.dataset.k==='members'||t.dataset.k==='staff')&&old!==val){for(const c of[...S.cleaning,...S.monthly,...S.work])if(c.who===old)c.who=val;for(const x of S.txns){if(x.by===old)x.by=val;if(x.frm===old)x.frm=val;if(x.to===old)x.to=val}}},null,false,!(num||f==='name'))}});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#dlg')?.hidden){closeDlg();dlgO=null}});
+addEventListener('hashchange',()=>{if(role==='family')renderFamily();else render();scrollTo(0,0);if(innerWidth<=860)document.querySelector('.snav [aria-current]')?.scrollIntoView({inline:'center',block:'nearest'})});
+render();
+}
+</script></body></html>
