@@ -5,23 +5,26 @@ ledger, bills and dues, chits and loans, payroll, family transfers,
 procurement, housekeeping schedule, meal plan, tasks, maintenance,
 reminders, reports, and a Liquid Glass design.
 
-## Two ways it runs
+## Logins and access (Firebase)
 
-| | Claude version | This GitHub version |
-|---|---|---|
-| Where data is saved | Secure shared database | This browser, this device only |
-| Logins and roles | Admins (owner and Editors) and family (Contributors) | None |
-| Family entry and approvals | Yes | No |
+The website uses Google sign-in and a Firebase Firestore database.
 
-The GitHub copy is the same code. When it opens outside Claude it
-cannot reach Claude's database, so it switches to device-only mode and
-starts with empty books.
+- **Admins** (full access): kanthirava.b@gmail.com, bhargavmail93@gmail.com,
+  lalithanaturals@gmail.com. The list lives in `fb.js` and `firestore.rules`.
+- **Family**: an admin adds their Google email on **Users & Access**, then sets
+  modules, limits and approval. Family members can only submit entries.
+- **Security**: `firestore.rules` is enforced by Google. Paste it into
+  Firebase console → Firestore Database → Rules → Publish.
+
+Until the Firebase settings are added to `index.html`, the site runs in
+device-only mode (saved in the browser, no logins).
 
 ## Files
 
 - `index.html` — the whole app (HTML, CSS and JavaScript in one file).
+- `firestore.rules` — database security rules to paste into Firebase.
 
 ## Editing with GitHub Copilot
 
 Open the folder in VS Code and ask Copilot about `index.html`.
-The app's logic sits in the `<script id="appjs">` block at the end of the file.
+The app's logic is in the `<script id="appjs">` block near the end of the file.

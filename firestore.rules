@@ -1,0 +1,38 @@
+rules_version = '2';
+// Household Accounts — who may read and write what.
+// Admins: full access. Family: only the emails an admin added on Users & Access.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function email() { return request.auth.token.email.lower(); }
+    function isAdmin() {
+      return signedIn() && email() in [
+        'kanthirava.b@gmail.com',
+        'bhargavmail93@gmail.com',
+        'lalithanaturals@gmail.com'
+      ];
+    }
+    function isFamily() {
+      return signedIn() && (isAdmin() ||
+        email() in get(/databases/$(database)/documents/shared/access).data.get('allowed', []));
+    }
+
+    // Money: ledger, dues, payroll, chits, reports — admins only.
+    match /books/{doc=**} { allow read, write: if isAdmin(); }
+    match /locks/{doc} { allow read, write: if isAdmin(); }
+
+    // Schedules, menu, shopping list, dropdown options, permissions — family may read, admins write.
+    match /shared/{doc} {
+      allow read: if isFamily();
+      allow write: if isAdmin();
+    }
+
+    // Ticks: today's housekeeping, items bought, task status.
+    match /ticks/{doc} { allow read, write: if isFamily(); }
+
+    // Each family member's own entries; admins see all.
+    match /inbox/{em} {
+      allow read, write: if isAdmin() || (isFamily() && email() == em);
+    }
+  }
+}
