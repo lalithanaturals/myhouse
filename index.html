@@ -236,7 +236,7 @@ auth.onAuthStateChanged(u=>{if(!u){overlay();return}
 </script><script id="appjs">{
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const INR=n=>'₹'+Math.round(+n||0).toLocaleString('en-IN');
+const INR=n=>{const v=Math.round(+n||0);return(v<0?'−':'')+'₹'+Math.abs(v).toLocaleString('en-IN')};
 const pad=n=>String(n).padStart(2,'0');
 const now=new Date(),today=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`,ym=today.slice(0,7),dom=now.getDate();
 const mName=k=>new Date(k+'-01T00:00').toLocaleString('en-IN',{month:'long',year:'numeric'});
